@@ -1,0 +1,2765 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hematología Clínica — UST</title>
+  <style>
+    :root {
+      --primary:        #e8a4b8;
+      --primary-dark:   #c97a96;
+      --secondary:      #b8d4e8;
+      --accent:         #a8d4b8;
+      --accent-warm:    #e8c4a0;
+      --bg-main:        #fdf8f9;
+      --bg-card:        #ffffff;
+      --bg-sidebar:     #2d2438;
+      --text-primary:   #3d2c35;
+      --text-secondary: #7a6570;
+      --border:         #f0dde5;
+      --shadow:         rgba(200,120,150,0.10);
+      --radius:         16px;
+      --radius-sm:      10px;
+      --transition:     250ms ease;
+    }
+
+    /* Modo oscuro */
+    body.dark {
+      --primary:        #e8a4b8;
+      --primary-dark:   #c97a96;
+      --secondary:      #8ab4cc;
+      --accent:         #7ab49a;
+      --bg-main:        #1a1520;
+      --bg-card:        #251e2e;
+      --bg-sidebar:     #1a1520;
+      --text-primary:   #f0e8ec;
+      --text-secondary: #b09aaa;
+      --border:         #3d2e3a;
+      --shadow:         rgba(0,0,0,0.30);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--bg-main);
+      color: var(--text-primary);
+      display: flex;
+      min-height: 100vh;
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    /* ── Sidebar ── */
+    .sidebar {
+      width: 240px; min-height: 100vh; background: var(--bg-sidebar);
+      display: flex; flex-direction: column; flex-shrink: 0;
+      position: sticky; top: 0; height: 100vh; overflow-y: auto;
+    }
+    .sidebar-brand {
+      padding: 28px 20px 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .brand-icon {
+      width: 40px; height: 40px; background: var(--primary);
+      border-radius: 12px; display: flex; align-items: center;
+      justify-content: center; font-size: 20px; margin-bottom: 10px;
+    }
+    .brand-name { color: #fff; font-size: 13px; font-weight: 700; letter-spacing: .03em; text-transform: uppercase; }
+    .brand-sub  { color: rgba(255,255,255,.45); font-size: 11px; margin-top: 2px; }
+    .sidebar-nav { padding: 16px 0; flex: 1; }
+    .nav-section-label {
+      color: rgba(255,255,255,.30); font-size: 10px; font-weight: 700;
+      letter-spacing: .1em; text-transform: uppercase; padding: 14px 20px 6px;
+    }
+    .nav-item {
+      display: flex; align-items: center; gap: 10px; padding: 10px 20px;
+      color: rgba(255,255,255,.55); font-size: 13.5px; cursor: pointer;
+      border-left: 3px solid transparent;
+      transition: background var(--transition), color var(--transition);
+    }
+    .nav-item:hover { background: rgba(255,255,255,.06); color: #fff; }
+    .nav-item.active {
+      background: rgba(232,164,184,.18); color: var(--primary);
+      border-left-color: var(--primary);
+    }
+    .nav-icon { font-size: 16px; width: 20px; text-align: center; }
+    .sidebar-footer {
+      padding: 16px 20px; border-top: 1px solid rgba(255,255,255,.08);
+      color: rgba(255,255,255,.35); font-size: 11.5px;
+    }
+
+    /* ── Main ── */
+    .main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+
+    /* ── Header ── */
+    .header {
+      background: var(--bg-card); border-bottom: 1px solid var(--border);
+      padding: 14px 36px; min-height: 76px; display: flex; align-items: center;
+      justify-content: space-between; gap: 20px;
+      position: sticky; top: 0; z-index: 50;
+      box-shadow: 0 1px 6px var(--shadow);
+    }
+    .header-right { display: flex; align-items: center; gap: 14px; }
+    .header-left h1 { font-size: 19px; font-weight: 700; color: var(--text-primary); }
+    .header-meta { font-size: 12px; color: var(--text-secondary); margin-top: 1px; }
+    .progress-wrap { display: flex; align-items: center; gap: 10px; }
+    .progress-label { font-size: 12px; color: var(--text-secondary); white-space: nowrap; }
+    .progress-bar-outer { width: 140px; height: 7px; background: var(--border); border-radius: 99px; overflow: hidden; }
+    .progress-bar-inner {
+      height: 100%; width: 0%;
+      background: linear-gradient(90deg, var(--primary-dark), var(--primary));
+      border-radius: 99px; transition: width .5s ease;
+    }
+    .progress-pct { font-size: 12px; font-weight: 600; color: var(--primary-dark); min-width: 28px; }
+
+    /* ── Page ── */
+    .page { padding: 36px; flex: 1; }
+    .page-title {
+      font-size: 13px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .08em; color: var(--text-secondary); margin-bottom: 6px;
+    }
+    .page-subtitle { font-size: 24px; font-weight: 800; color: var(--text-primary); margin-bottom: 28px; letter-spacing: -.02em; }
+    .app-section { display: none; }
+    .app-section.active { display: block; }
+    .section-gap { margin-top: 40px; }
+    .section-heading { font-size: 16px; font-weight: 700; color: var(--text-primary); margin-bottom: 16px; }
+
+    /* ── Unit cards ── */
+    .units-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(300px,1fr)); gap: 22px; }
+    .unit-card {
+      background: var(--bg-card); border-radius: 20px; border: 1.5px solid var(--border);
+      box-shadow: 0 4px 16px var(--shadow); cursor: pointer;
+      transition: transform var(--transition), box-shadow var(--transition);
+      border-left: 5px solid transparent; overflow: hidden; display: flex; flex-direction: column;
+    }
+    .unit-card:hover { transform: translateY(-4px); box-shadow: 0 8px 28px var(--shadow); }
+    .unit-card[data-unit="1"]   { --uc: #e8a4b8; --ub: #fdeef3; }
+    .unit-card[data-unit="2"]   { --uc: #c97a96; --ub: #f9e4ec; }
+    .unit-card[data-unit="3"]   { --uc: #a8d4b8; --ub: #e8f6ed; }
+    .unit-card[data-unit="lab"] { --uc: #b8d4e8; --ub: #e8f3fb; }
+    .unit-card:hover { border-left-color: var(--uc); }
+    .unit-card-top { padding: 22px 22px 16px; display: flex; align-items: flex-start; gap: 16px; flex: 1; }
+    .unit-number-badge {
+      width: 52px; height: 52px; border-radius: 14px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; font-weight: 800;
+      background: var(--ub); color: var(--uc);
+    }
+    .unit-info { flex: 1; min-width: 0; }
+    .unit-title { font-size: 15.5px; font-weight: 700; color: var(--text-primary); margin-bottom: 5px; line-height: 1.3; }
+    .unit-subtitle { font-size: 12.5px; color: var(--text-secondary); margin-bottom: 10px; font-weight: 300; }
+    .unit-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+    .badge { display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; padding: 3px 9px; border-radius: 99px; }
+    .badge-medio    { background: #fde8c0; color: #b8860b; }
+    .badge-dificil  { background: #f5c6d0; color: #c0392b; }
+    .badge-esencial { background: #c8e6c9; color: #2e7d32; }
+    .badge-tiempo   { background: var(--bg-main); color: var(--text-secondary); }
+    .unit-card-footer { padding: 12px 22px; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: flex-end; }
+    .unit-link { font-size: 12.5px; font-weight: 600; color: var(--text-secondary); display: flex; align-items: center; gap: 4px; transition: color var(--transition); }
+    .unit-card:hover .unit-link { color: var(--uc); }
+
+    /* ── Stats ── */
+    .stats-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; }
+    .stat-card {
+      background: var(--bg-card); border-radius: 16px; border: 1.5px solid var(--border);
+      padding: 20px; box-shadow: 0 2px 12px var(--shadow); display: flex; flex-direction: column; gap: 8px;
+    }
+    .stat-icon { width: 36px; height: 36px; border-radius: 10px; background: #fdeef3; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+    .stat-value { font-size: 24px; font-weight: 800; color: var(--text-primary); }
+    .stat-label { font-size: 12px; color: var(--text-secondary); font-weight: 300; }
+
+    /* ── Quick tools ── */
+    .tools-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; }
+    .tool-card {
+      background: var(--bg-card); border-radius: 20px; border: 1.5px solid var(--border);
+      padding: 28px 24px; box-shadow: 0 2px 12px var(--shadow);
+      cursor: pointer; transition: transform var(--transition), box-shadow var(--transition);
+      display: flex; flex-direction: column; gap: 12px;
+    }
+    .tool-card:hover { transform: translateY(-4px); box-shadow: 0 8px 28px var(--shadow); }
+    .tool-icon { width: 48px; height: 48px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 24px; }
+    .tool-icon-arbol { background: #fdeef3; }
+    .tool-icon-comp  { background: #e8f3fb; }
+    .tool-icon-calc  { background: #e8f6ed; }
+    .tool-title { font-size: 16px; font-weight: 700; color: var(--text-primary); }
+    .tool-desc  { font-size: 13px; color: var(--text-secondary); font-weight: 300; line-height: 1.5; flex: 1; }
+    .tool-btn {
+      display: inline-block; background: var(--primary); color: #fff;
+      border: none; border-radius: 25px; padding: 9px 20px;
+      font-size: 13px; font-weight: 600; cursor: pointer;
+      transition: background var(--transition); align-self: flex-start;
+    }
+    .tool-btn:hover { background: var(--primary-dark); }
+
+    /* ── Reference panel ── */
+    .ref-panel { background: var(--bg-card); border-radius: 20px; border: 1.5px solid var(--border); box-shadow: 0 2px 12px var(--shadow); overflow: hidden; }
+    .ref-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 18px 24px; cursor: pointer;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: #fff; transition: opacity var(--transition);
+    }
+    .ref-header:hover { opacity: .92; }
+    .ref-header-left { display: flex; align-items: center; gap: 10px; }
+    .ref-header h3 { font-size: 15px; font-weight: 700; }
+    .ref-chevron { font-size: 18px; transition: transform var(--transition); }
+    .ref-chevron.open { transform: rotate(180deg); }
+    .ref-body { display: none; }
+    .ref-body.open { display: block; }
+    .ref-table { width: 100%; border-collapse: collapse; }
+    .ref-table tr:nth-child(even) { background: var(--bg-main); }
+    .ref-table td { padding: 11px 24px; font-size: 13.5px; border-bottom: 1px solid var(--border); }
+    .ref-table td:first-child { font-weight: 600; color: var(--text-primary); width: 40%; }
+    .ref-table td:last-child  { color: var(--text-secondary); }
+    .ref-table tr:last-child td { border-bottom: none; }
+
+    /* ── Tip ── */
+    .tip-card {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+      border-radius: 20px; padding: 28px 32px; box-shadow: 0 4px 20px var(--shadow);
+      display: flex; align-items: flex-start; gap: 20px;
+    }
+    .tip-icon { font-size: 36px; flex-shrink: 0; }
+    .tip-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: rgba(255,255,255,.75); margin-bottom: 6px; }
+    .tip-text  { font-size: 16px; font-weight: 600; color: #fff; line-height: 1.5; }
+
+    /* ── Árbol ── */
+    .arbol-container { max-width: 800px; }
+    .arbol-step { animation: fadeIn .3s ease; }
+    @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+    .arbol-breadcrumb { display: flex; align-items: center; gap: 8px; margin-bottom: 20px; font-size: 13px; color: var(--text-secondary); flex-wrap: wrap; }
+    .arbol-breadcrumb b { color: var(--primary-dark); }
+    .arbol-progress { display: flex; gap: 6px; margin-bottom: 24px; }
+    .arbol-dot { width: 8px; height: 8px; border-radius: 99px; background: var(--border); transition: all .25s; }
+    .arbol-dot.done    { background: var(--primary); }
+    .arbol-dot.current { background: var(--primary-dark); width: 20px; }
+    .arbol-question { font-size: 20px; font-weight: 700; color: var(--text-primary); margin-bottom: 6px; }
+    .arbol-hint { font-size: 13px; color: var(--text-secondary); margin-bottom: 22px; font-weight: 300; }
+    .arbol-options { display: flex; flex-direction: column; gap: 12px; }
+    .arbol-option {
+      background: var(--bg-card); border: 2px solid var(--border); border-radius: 16px;
+      padding: 18px 22px; cursor: pointer; display: flex; align-items: center; gap: 14px;
+      transition: border-color var(--transition), background var(--transition), transform var(--transition);
+    }
+    .arbol-option:hover { border-color: var(--primary); background: #fdeef3; transform: translateX(5px); }
+    body.dark .arbol-option:hover { background: rgba(232,164,184,.10); }
+    .arbol-opt-icon { width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+    .arbol-opt-text { font-size: 15px; font-weight: 600; color: var(--text-primary); }
+    .arbol-opt-sub  { font-size: 12px; color: var(--text-secondary); margin-top: 2px; font-weight: 300; }
+    .arbol-result {
+      background: var(--bg-card); border-radius: 20px; border: 2px solid var(--primary);
+      padding: 32px; box-shadow: 0 4px 20px var(--shadow); animation: fadeIn .35s ease;
+    }
+    .arbol-result-hdr { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; }
+    .arbol-result-ico { width: 56px; height: 56px; border-radius: 16px; background: #fdeef3; display: flex; align-items: center; justify-content: center; font-size: 28px; }
+    .arbol-result-name { font-size: 22px; font-weight: 800; color: var(--text-primary); }
+    .arbol-result-sub  { font-size: 13px; color: var(--text-secondary); font-weight: 300; margin-top: 3px; }
+    .arbol-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
+    .arbol-info-block { background: var(--bg-main); border-radius: 12px; padding: 16px; }
+    .arbol-info-lbl { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--text-secondary); margin-bottom: 6px; }
+    .arbol-info-txt { font-size: 13.5px; color: var(--text-primary); line-height: 1.5; }
+    .arbol-reset {
+      background: var(--primary); color: #fff; border: none; border-radius: 25px;
+      padding: 12px 28px; font-size: 14px; font-weight: 600; cursor: pointer;
+      margin-top: 24px; transition: background var(--transition);
+    }
+    .arbol-reset:hover { background: var(--primary-dark); }
+    .arbol-back {
+      background: transparent; color: var(--text-secondary); border: 1.5px solid var(--border);
+      border-radius: 25px; padding: 10px 22px; font-size: 13px; font-weight: 600;
+      cursor: pointer; margin-top: 20px; transition: border-color var(--transition), color var(--transition);
+    }
+    .arbol-back:hover { border-color: var(--primary); color: var(--primary-dark); }
+
+    /* ── Comparador ── */
+    .comp-selectors { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 28px; }
+    .comp-sel-label { font-size: 13px; font-weight: 600; color: var(--text-secondary); margin-bottom: 8px; }
+    .comp-select {
+      width: 100%; padding: 12px 16px; border: 2px solid var(--border);
+      border-radius: 12px; background: var(--bg-card); color: var(--text-primary);
+      font-size: 14px; font-family: inherit; outline: none; cursor: pointer;
+      transition: border-color var(--transition);
+    }
+    .comp-select:focus { border-color: var(--primary); }
+    .comp-select-a { border-left: 4px solid var(--primary); }
+    .comp-select-b { border-left: 4px solid var(--secondary); }
+    .comp-table-wrap { background: var(--bg-card); border-radius: 20px; border: 1.5px solid var(--border); overflow: hidden; box-shadow: 0 2px 12px var(--shadow); }
+    .comp-table { width: 100%; border-collapse: collapse; }
+    .comp-table th { padding: 16px 20px; font-size: 14px; font-weight: 700; border-bottom: 2px solid var(--border); text-align: left; }
+    .comp-table th:nth-child(1) { width: 18%; background: var(--bg-main); color: var(--text-secondary); font-size: 11px; text-transform: uppercase; letter-spacing: .06em; }
+    .comp-table th:nth-child(2) { background: #fdeef3; color: var(--primary-dark); }
+    .comp-table th:nth-child(3) { background: #e8f3fb; color: #4a7a98; }
+    .comp-table td { padding: 13px 20px; font-size: 13.5px; border-bottom: 1px solid var(--border); vertical-align: top; line-height: 1.5; }
+    .comp-table td:first-child { font-weight: 700; font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--text-secondary); background: var(--bg-main); }
+    .comp-table tr:last-child td { border-bottom: none; }
+    .comp-table tr:nth-child(even) td:not(:first-child) { background: rgba(253,248,249,.5); }
+    .comp-placeholder { text-align: center; padding: 60px 20px; color: var(--text-secondary); font-size: 14px; }
+    .comp-ph-icon { font-size: 48px; margin-bottom: 14px; }
+
+    /* ── Calculadora ── */
+    .calc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
+    .calc-fields { display: flex; flex-direction: column; gap: 14px; }
+    .calc-group { display: flex; flex-direction: column; gap: 5px; }
+    .calc-label { font-size: 13px; font-weight: 600; color: var(--text-secondary); }
+    .calc-input {
+      padding: 12px 16px; border: 2px solid var(--border); border-radius: 12px;
+      background: var(--bg-card); color: var(--text-primary); font-size: 15px;
+      font-family: inherit; outline: none; transition: border-color var(--transition);
+    }
+    .calc-input:focus { border-color: var(--primary); }
+    .calc-btn {
+      background: var(--primary); color: #fff; border: none; border-radius: 25px;
+      padding: 14px 32px; font-size: 15px; font-weight: 600; cursor: pointer;
+      margin-top: 6px; transition: background var(--transition); align-self: flex-start;
+    }
+    .calc-btn:hover { background: var(--primary-dark); }
+    .calc-results { display: flex; flex-direction: column; gap: 16px; }
+    .calc-empty { text-align: center; padding: 60px 20px; color: var(--text-secondary); font-size: 14px; }
+    .calc-empty-icon { font-size: 48px; margin-bottom: 14px; }
+    .calc-card { background: var(--bg-card); border-radius: 16px; border: 1.5px solid var(--border); padding: 20px; box-shadow: 0 2px 8px var(--shadow); }
+    .calc-card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
+    .calc-card-name { font-size: 14px; font-weight: 700; color: var(--text-primary); }
+    .calc-card-formula { font-size: 11px; color: var(--text-secondary); margin-top: 2px; font-weight: 300; }
+    .calc-pill { padding: 5px 14px; border-radius: 99px; font-size: 13px; font-weight: 700; white-space: nowrap; flex-shrink: 0; }
+    .calc-pill-normal   { background: #a8d4b8; color: #1b5e3b; }
+    .calc-pill-limite   { background: #e8c4a0; color: #8b4513; }
+    .calc-pill-alterado { background: #f5c6d0; color: #c0392b; }
+    .calc-interp { font-size: 13px; color: var(--text-secondary); line-height: 1.55; }
+
+    /* ── Modal ── */
+    .um-overlay {
+      position: fixed; inset: 0; background: rgba(45,36,56,.55);
+      z-index: 200; opacity: 0; visibility: hidden;
+      transition: opacity var(--transition), visibility var(--transition);
+    }
+    .um-overlay.open { opacity: 1; visibility: visible; }
+    .um-panel {
+      position: fixed; top: 0; right: 0; width: 65%; max-width: 860px; height: 100vh;
+      background: var(--bg-card); z-index: 201; display: flex; flex-direction: column;
+      transform: translateX(100%); transition: transform var(--transition);
+      box-shadow: -6px 0 40px rgba(61,44,53,.15);
+    }
+    .um-panel.open { transform: translateX(0); }
+    .um-header { display: flex; align-items: center; gap: 16px; padding: 22px 28px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+    .um-unit-badge { width: 46px; height: 46px; border-radius: 13px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800; flex-shrink: 0; }
+    .um-header-text { flex: 1; min-width: 0; }
+    .um-header-text h2 { font-size: 17px; font-weight: 700; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .um-header-text p  { font-size: 12px; color: var(--text-secondary); margin-top: 2px; font-weight: 300; }
+    .um-close {
+      width: 36px; height: 36px; border-radius: 10px; border: 1.5px solid var(--border);
+      background: transparent; cursor: pointer; font-size: 18px; color: var(--text-secondary);
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+      transition: background var(--transition), color var(--transition);
+    }
+    .um-close:hover { background: var(--bg-main); color: var(--text-primary); }
+    .um-tabs { display: flex; border-bottom: 1px solid var(--border); padding: 0 28px; gap: 2px; flex-shrink: 0; overflow-x: auto; }
+    .um-tab {
+      padding: 13px 16px 11px; font-size: 13px; font-weight: 600;
+      color: var(--text-secondary); cursor: pointer; border: none;
+      background: transparent; border-bottom: 2.5px solid transparent;
+      white-space: nowrap; transition: color var(--transition), border-color var(--transition);
+    }
+    .um-tab:hover { color: var(--text-primary); }
+    .um-tab.active { color: var(--primary-dark); border-bottom-color: var(--primary-dark); }
+    .um-content { flex: 1; overflow-y: auto; padding: 28px; }
+    .um-content p { color: var(--text-secondary); font-size: 14px; line-height: 1.7; }
+
+    /* ── Dark mode — fix inline-styled tables & boxes inside modal ── */
+    body.dark .um-content { color: var(--text-primary); }
+    body.dark .um-content table thead tr { filter: brightness(0.65) saturate(0.8); }
+    body.dark .um-content table th { color: #fff !important; }
+    body.dark .um-content table td {
+      background: #231630 !important;
+      color: #ddc8e8 !important;
+      border-color: #3d2848 !important;
+    }
+    body.dark .um-content table tr:nth-child(even) td,
+    body.dark .um-content table tr[style*="background"] td {
+      background: #1b1026 !important;
+    }
+    body.dark .um-content div[style*="background"] {
+      background: #2a1c38 !important;
+      border-left-color: var(--primary) !important;
+    }
+    body.dark .um-content p { color: var(--text-secondary) !important; }
+    body.dark .um-content li { color: var(--text-secondary) !important; }
+    body.dark .um-content strong,
+    body.dark .um-content b { color: var(--text-primary) !important; }
+    body.dark .um-content em { color: var(--text-secondary) !important; }
+
+    /* ── Botón imprimir/PDF modal ── */
+    .um-print {
+      display: flex; align-items: center; gap: 6px;
+      padding: 7px 14px; border-radius: 99px; flex-shrink: 0;
+      border: 1.5px solid var(--accent); background: transparent;
+      color: #2e7d32; font-size: 12px; font-weight: 600; cursor: pointer;
+      transition: background var(--transition), color var(--transition);
+    }
+    body.dark .um-print { color: var(--accent); }
+    .um-print:hover { background: var(--accent); color: #fff; }
+
+    /* ── Dark mode toggle ── */
+    .dark-toggle {
+      width: 46px; height: 26px; border-radius: 99px;
+      border: 1.5px solid var(--border); background: var(--border);
+      cursor: pointer; position: relative; flex-shrink: 0;
+      transition: background var(--transition), border-color var(--transition);
+    }
+    .dark-toggle::after {
+      content: ''; position: absolute;
+      width: 20px; height: 20px; border-radius: 50%;
+      background: var(--bg-card); top: 2px; left: 2px;
+      transition: transform var(--transition), background var(--transition);
+      box-shadow: 0 1px 4px rgba(0,0,0,.2);
+    }
+    body.dark .dark-toggle { background: var(--primary-dark); border-color: var(--primary-dark); }
+    body.dark .dark-toggle::after { transform: translateX(20px); background: #fff; }
+    .dark-toggle:hover { border-color: var(--primary); }
+
+    /* ── Buscador ── */
+    .search-wrap { position: relative; }
+    .search-input {
+      padding: 8px 14px 8px 36px; border: 1.5px solid var(--border);
+      border-radius: 25px; background: var(--bg-main); color: var(--text-primary);
+      font-size: 13px; font-family: inherit; outline: none; width: 220px;
+      transition: border-color var(--transition), width var(--transition);
+    }
+    .search-input:focus { border-color: var(--primary); width: 280px; }
+    .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 14px; color: var(--text-secondary); pointer-events: none; }
+    .search-results {
+      position: absolute; top: calc(100% + 8px); right: 0; width: 360px;
+      background: var(--bg-card); border: 1.5px solid var(--border); border-radius: 16px;
+      box-shadow: 0 8px 28px var(--shadow); z-index: 100; display: none; overflow: hidden;
+    }
+    .search-results.open { display: block; }
+    .search-result-item {
+      padding: 12px 16px; cursor: pointer; border-bottom: 1px solid var(--border);
+      transition: background var(--transition);
+    }
+    .search-result-item:last-child { border-bottom: none; }
+    .search-result-item:hover { background: var(--bg-main); }
+    .search-result-unit { font-size: 11px; color: var(--primary-dark); font-weight: 700; text-transform: uppercase; letter-spacing: .06em; }
+    .search-result-text { font-size: 13px; color: var(--text-primary); margin-top: 2px; }
+    .search-highlight { background: #fde8c0; border-radius: 3px; padding: 1px 2px; }
+    .search-empty { padding: 20px 16px; text-align: center; color: var(--text-secondary); font-size: 13px; }
+
+    /* ── Unit progress bar ── */
+    .unit-progress-wrap { padding: 0 22px 14px; }
+    .unit-progress-bar-outer { height: 5px; background: var(--border); border-radius: 99px; overflow: hidden; }
+    .unit-progress-bar-inner {
+      height: 100%; width: 0%; border-radius: 99px;
+      background: var(--uc, var(--primary));
+      transition: width .5s ease;
+    }
+    .unit-progress-label { font-size: 11px; color: var(--text-secondary); margin-top: 5px; }
+
+    /* ── Biblioteca ── */
+    .lib-filters { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+    .lib-filter-btn {
+      padding: 7px 16px; border-radius: 99px; border: 1.5px solid var(--border);
+      background: var(--bg-card); color: var(--text-secondary); font-size: 13px; font-weight: 600;
+      cursor: pointer; transition: all var(--transition);
+    }
+    .lib-filter-btn.active { background: var(--primary); border-color: var(--primary); color: #fff; }
+    .lib-filter-btn:hover:not(.active) { border-color: var(--primary); color: var(--primary-dark); }
+    .lib-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+    .lib-card {
+      background: var(--bg-card); border-radius: 16px; border: 1.5px solid var(--border);
+      padding: 20px; box-shadow: 0 2px 10px var(--shadow);
+      display: flex; flex-direction: column; gap: 10px;
+    }
+    .lib-unit-tag {
+      display: inline-block; padding: 3px 10px; border-radius: 99px;
+      font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em;
+    }
+    .lib-card-name { font-size: 14px; font-weight: 700; color: var(--text-primary); line-height: 1.4; flex: 1; }
+    .lib-card-btn {
+      background: var(--primary); color: #fff; border: none; border-radius: 25px;
+      padding: 8px 18px; font-size: 13px; font-weight: 600; cursor: pointer;
+      transition: background var(--transition); align-self: flex-start;
+    }
+    .lib-card-btn:hover { background: var(--primary-dark); }
+    .lib-modal-overlay {
+      position: fixed; inset: 0; background: rgba(45,36,56,.6); z-index: 300;
+      display: none; align-items: center; justify-content: center;
+    }
+    .lib-modal-overlay.open { display: flex; }
+    .lib-modal {
+      background: var(--bg-card); border-radius: 20px; padding: 32px; max-width: 600px; width: 90%;
+      max-height: 80vh; overflow-y: auto; box-shadow: 0 12px 40px rgba(45,36,56,.3);
+      animation: fadeIn .25s ease;
+    }
+    .lib-modal-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 20px; }
+    .lib-modal-title { font-size: 17px; font-weight: 700; color: var(--text-primary); line-height: 1.4; }
+    .lib-modal-close {
+      width: 32px; height: 32px; border-radius: 8px; border: 1.5px solid var(--border);
+      background: transparent; cursor: pointer; font-size: 16px; color: var(--text-secondary);
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+      transition: background var(--transition);
+    }
+    .lib-modal-close:hover { background: var(--bg-main); }
+
+    /* ── Mapa conceptual SVG ── */
+    .mapa-svg-wrap { width: 100%; overflow-x: auto; }
+    .mapa-svg-wrap svg { max-width: 100%; height: auto; display: block; margin: 0 auto; }
+
+    /* ── Notas editables (modal tab) ── */
+    .notes-editor-wrap { display: flex; flex-direction: column; gap: 12px; }
+    .notes-editor-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+    .notes-editor-status { font-size: 12px; color: var(--text-secondary); font-weight: 500; display: flex; align-items: center; gap: 6px; }
+    .notes-editor-status .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
+    .notes-editor-status.saving .dot { background: var(--accent-warm); animation: pulseDot 1s infinite; }
+    @keyframes pulseDot { 0%,100% { opacity:1; } 50% { opacity:.3; } }
+    .notes-editor-actions { display: flex; gap: 8px; }
+    .notes-editor-btn {
+      padding: 6px 14px; border-radius: 99px; border: 1.5px solid var(--border);
+      background: var(--bg-card); color: var(--text-secondary); font-size: 12px;
+      font-weight: 600; cursor: pointer; transition: all var(--transition);
+    }
+    .notes-editor-btn:hover { border-color: var(--primary); color: var(--primary-dark); }
+    .notes-editor-btn.danger:hover { border-color: #c0392b; color: #c0392b; }
+    .notes-editor-area {
+      width: 100%; min-height: 320px; resize: vertical;
+      padding: 18px 20px; border: 1.5px solid var(--border); border-radius: var(--radius);
+      background: var(--bg-card); color: var(--text-primary); font-family: 'Segoe UI', sans-serif;
+      font-size: 14px; line-height: 1.7; outline: none;
+      transition: border-color var(--transition);
+    }
+    .notes-editor-area:focus { border-color: var(--primary); }
+    .notes-editor-hint { font-size: 12px; color: var(--text-secondary); font-weight: 300; }
+    body.dark .notes-editor-area { background: #1f1828; color: var(--text-primary); }
+
+    /* ── Quiz ── */
+    .quiz-intro { background: var(--bg-card); border-radius: 20px; border: 1.5px solid var(--border); padding: 28px; box-shadow: 0 2px 12px var(--shadow); margin-bottom: 24px; }
+    .quiz-intro-title { font-size: 17px; font-weight: 700; color: var(--text-primary); margin-bottom: 8px; }
+    .quiz-intro-desc { font-size: 13.5px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 18px; }
+    .quiz-units-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px; }
+    .quiz-unit-card {
+      background: var(--bg-main); border-radius: 16px; border: 1.5px solid var(--border);
+      padding: 18px; cursor: pointer; transition: transform var(--transition), border-color var(--transition);
+      display: flex; flex-direction: column; gap: 10px;
+    }
+    .quiz-unit-card:hover { transform: translateY(-3px); border-color: var(--primary); }
+    .quiz-unit-card[data-uid="1"]   { --quc:#c97a96; --qub:#fdeef3; }
+    .quiz-unit-card[data-uid="2"]   { --quc:#a0495e; --qub:#f9e4ec; }
+    .quiz-unit-card[data-uid="3"]   { --quc:#3a8a5c; --qub:#e8f6ed; }
+    .quiz-unit-card[data-uid="lab"] { --quc:#5a8fa8; --qub:#e8f3fb; }
+    .quiz-unit-card[data-uid="all"] { --quc:#7a5a9a; --qub:#f0e8fb; }
+    .quiz-unit-badge {
+      width: 42px; height: 42px; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 800;
+      background: var(--qub); color: var(--quc);
+    }
+    .quiz-unit-name { font-size: 14px; font-weight: 700; color: var(--text-primary); }
+    .quiz-unit-meta { font-size: 12px; color: var(--text-secondary); display: flex; gap: 10px; flex-wrap: wrap; }
+    .quiz-unit-best {
+      font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 99px;
+      background: var(--qub); color: var(--quc); display: inline-block;
+    }
+    .quiz-runner { background: var(--bg-card); border-radius: 20px; border: 1.5px solid var(--border); padding: 28px; box-shadow: 0 2px 12px var(--shadow); }
+    .quiz-runner-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 18px; flex-wrap: wrap; }
+    .quiz-runner-meta { display: flex; align-items: center; gap: 12px; }
+    .quiz-runner-pill { font-size: 11px; font-weight: 700; padding: 4px 12px; border-radius: 99px; background: var(--primary); color: #fff; text-transform: uppercase; letter-spacing: .06em; }
+    .quiz-runner-counter { font-size: 13px; color: var(--text-secondary); font-weight: 600; }
+    .quiz-runner-score { font-size: 13px; font-weight: 700; color: var(--accent); }
+    .quiz-runner-exit {
+      background: transparent; border: 1.5px solid var(--border); color: var(--text-secondary);
+      border-radius: 99px; padding: 6px 14px; font-size: 12px; font-weight: 600; cursor: pointer;
+      transition: border-color var(--transition), color var(--transition);
+    }
+    .quiz-runner-exit:hover { border-color: #c0392b; color: #c0392b; }
+    .quiz-progress { height: 6px; background: var(--border); border-radius: 99px; overflow: hidden; margin-bottom: 22px; }
+    .quiz-progress-bar { height: 100%; background: linear-gradient(90deg, var(--primary-dark), var(--primary)); border-radius: 99px; transition: width .35s ease; }
+    .quiz-question {
+      font-size: 18px; font-weight: 700; color: var(--text-primary);
+      line-height: 1.5; margin-bottom: 8px;
+    }
+    .quiz-hint { font-size: 12.5px; color: var(--text-secondary); margin-bottom: 22px; font-weight: 300; }
+    .quiz-options { display: flex; flex-direction: column; gap: 10px; margin-bottom: 22px; }
+    .quiz-option {
+      display: flex; align-items: center; gap: 14px;
+      padding: 14px 18px; border: 2px solid var(--border); border-radius: 14px;
+      background: var(--bg-card); cursor: pointer; transition: border-color var(--transition), background var(--transition), transform var(--transition);
+    }
+    .quiz-option:hover:not(.disabled) { border-color: var(--primary); background: #fdeef3; transform: translateX(4px); }
+    body.dark .quiz-option:hover:not(.disabled) { background: rgba(232,164,184,.10); }
+    .quiz-option.disabled { cursor: default; opacity: .85; }
+    .quiz-option.disabled:hover { transform: none; }
+    .quiz-option-letter {
+      width: 32px; height: 32px; border-radius: 10px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 800; background: var(--bg-main); color: var(--text-secondary);
+      transition: background var(--transition), color var(--transition);
+    }
+    .quiz-option:hover:not(.disabled) .quiz-option-letter { background: var(--primary); color: #fff; }
+    .quiz-option-text { font-size: 14px; color: var(--text-primary); font-weight: 500; flex: 1; line-height: 1.45; }
+    .quiz-option.correct { border-color: #2e7d32; background: #e8f6ed; }
+    body.dark .quiz-option.correct { background: rgba(46,125,50,.18); }
+    .quiz-option.correct .quiz-option-letter { background: #2e7d32; color: #fff; }
+    .quiz-option.wrong { border-color: #c0392b; background: #fbe5e5; }
+    body.dark .quiz-option.wrong { background: rgba(192,57,43,.18); }
+    .quiz-option.wrong .quiz-option-letter { background: #c0392b; color: #fff; }
+    .quiz-feedback {
+      padding: 16px 20px; border-radius: 14px; margin-bottom: 22px;
+      font-size: 13.5px; line-height: 1.6; border-left: 4px solid;
+    }
+    .quiz-feedback.ok    { background: #e8f6ed; border-color: #2e7d32; color: #1b5e3b; }
+    .quiz-feedback.bad   { background: #fbe5e5; border-color: #c0392b; color: #6e1c14; }
+    body.dark .quiz-feedback.ok  { background: rgba(46,125,50,.15); color: #c8e6c9; }
+    body.dark .quiz-feedback.bad { background: rgba(192,57,43,.15); color: #f5c6d0; }
+    .quiz-feedback-label { font-weight: 700; text-transform: uppercase; font-size: 11px; letter-spacing: .08em; margin-bottom: 4px; display: block; }
+    .quiz-actions { display: flex; gap: 12px; justify-content: flex-end; flex-wrap: wrap; }
+    .quiz-btn-primary {
+      background: var(--primary); color: #fff; border: none; border-radius: 99px;
+      padding: 11px 26px; font-size: 14px; font-weight: 700; cursor: pointer;
+      transition: background var(--transition);
+    }
+    .quiz-btn-primary:hover { background: var(--primary-dark); }
+    .quiz-btn-secondary {
+      background: transparent; color: var(--text-secondary); border: 1.5px solid var(--border);
+      border-radius: 99px; padding: 11px 24px; font-size: 13.5px; font-weight: 600; cursor: pointer;
+      transition: border-color var(--transition), color var(--transition);
+    }
+    .quiz-btn-secondary:hover { border-color: var(--primary); color: var(--primary-dark); }
+
+    /* Quiz resultados */
+    .quiz-result-card {
+      background: var(--bg-card); border-radius: 20px; border: 1.5px solid var(--border);
+      padding: 36px 32px; box-shadow: 0 2px 12px var(--shadow); text-align: center;
+    }
+    .quiz-result-ring {
+      width: 160px; height: 160px; margin: 0 auto 24px; position: relative;
+    }
+    .quiz-result-pct {
+      position: absolute; inset: 0; display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+    }
+    .quiz-result-pct-num { font-size: 38px; font-weight: 800; color: var(--text-primary); line-height: 1; }
+    .quiz-result-pct-sub { font-size: 11px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: .08em; margin-top: 4px; }
+    .quiz-result-title { font-size: 22px; font-weight: 800; color: var(--text-primary); margin-bottom: 6px; }
+    .quiz-result-msg { font-size: 14px; color: var(--text-secondary); line-height: 1.55; margin-bottom: 22px; }
+    .quiz-result-stats { display: flex; justify-content: center; gap: 36px; flex-wrap: wrap; margin-bottom: 26px; }
+    .quiz-result-stat-num { font-size: 22px; font-weight: 800; color: var(--text-primary); }
+    .quiz-result-stat-lbl { font-size: 11px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: .08em; }
+    .quiz-result-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+    .quiz-review-list { text-align: left; margin-top: 26px; }
+    .quiz-review-item {
+      padding: 12px 16px; margin-bottom: 8px; border-radius: 12px;
+      background: var(--bg-main); border-left: 4px solid;
+      display: flex; align-items: flex-start; gap: 10px;
+    }
+    .quiz-review-item.ok  { border-color: #2e7d32; }
+    .quiz-review-item.bad { border-color: #c0392b; }
+    .quiz-review-ico { font-size: 16px; flex-shrink: 0; line-height: 1.3; }
+    .quiz-review-q { font-size: 13px; font-weight: 600; color: var(--text-primary); margin-bottom: 3px; }
+    .quiz-review-a { font-size: 12px; color: var(--text-secondary); }
+
+    /* ── Flashcards ── */
+    .fc-intro { background: var(--bg-card); border-radius: 20px; border: 1.5px solid var(--border); padding: 28px; box-shadow: 0 2px 12px var(--shadow); margin-bottom: 24px; }
+    .fc-stage { display: flex; flex-direction: column; align-items: center; gap: 22px; padding: 12px 0 32px; }
+    .fc-meta-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; max-width: 560px; flex-wrap: wrap; }
+    .fc-counter { font-size: 13px; color: var(--text-secondary); font-weight: 600; }
+    .fc-deck-pill { font-size: 11px; font-weight: 700; padding: 4px 12px; border-radius: 99px; background: var(--primary); color: #fff; text-transform: uppercase; letter-spacing: .06em; }
+    .fc-card-wrap { width: 100%; max-width: 560px; perspective: 1400px; }
+    .fc-card {
+      position: relative; width: 100%; min-height: 280px;
+      transform-style: preserve-3d; transition: transform .55s ease;
+      cursor: pointer;
+    }
+    .fc-card.flipped { transform: rotateY(180deg); }
+    .fc-face {
+      position: absolute; inset: 0; width: 100%; height: 100%;
+      backface-visibility: hidden; -webkit-backface-visibility: hidden;
+      background: var(--bg-card); border-radius: 22px; border: 2px solid var(--border);
+      box-shadow: 0 6px 24px var(--shadow);
+      padding: 36px 32px; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; text-align: center; gap: 14px;
+    }
+    .fc-face.front { border-left: 6px solid var(--primary); }
+    .fc-face.back  {
+      transform: rotateY(180deg);
+      border-left: 6px solid var(--accent);
+      background: linear-gradient(135deg, var(--bg-card), var(--bg-main));
+    }
+    .fc-face-label { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .12em; color: var(--text-secondary); }
+    .fc-face.front .fc-face-label { color: var(--primary-dark); }
+    .fc-face.back  .fc-face-label { color: #2e7d32; }
+    .fc-face-content { font-size: 18px; font-weight: 700; color: var(--text-primary); line-height: 1.5; }
+    .fc-face.back .fc-face-content { font-size: 15px; font-weight: 500; line-height: 1.6; }
+    .fc-tag { display: inline-block; font-size: 10px; font-weight: 700; padding: 3px 10px; border-radius: 99px; background: var(--bg-main); color: var(--text-secondary); letter-spacing: .06em; text-transform: uppercase; }
+    .fc-controls { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+    .fc-btn {
+      padding: 11px 22px; border-radius: 99px; border: 1.5px solid var(--border);
+      background: var(--bg-card); color: var(--text-primary); font-size: 13px; font-weight: 700;
+      cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
+      transition: all var(--transition);
+    }
+    .fc-btn:hover { border-color: var(--primary); color: var(--primary-dark); }
+    .fc-btn-bad   { color: #c0392b; }
+    .fc-btn-bad:hover   { border-color: #c0392b; background: #fbe5e5; }
+    .fc-btn-good  { color: #2e7d32; }
+    .fc-btn-good:hover  { border-color: #2e7d32; background: #e8f6ed; }
+    .fc-btn-flip  { background: var(--primary); color: #fff; border-color: var(--primary); }
+    .fc-btn-flip:hover { background: var(--primary-dark); border-color: var(--primary-dark); color: #fff; }
+
+    /* ── Mi Progreso ── */
+    .mp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; margin-bottom: 28px; }
+    .mp-card { background: var(--bg-card); border-radius: 20px; border: 1.5px solid var(--border); padding: 24px; box-shadow: 0 2px 12px var(--shadow); }
+    .mp-card-title { font-size: 14px; font-weight: 700; color: var(--text-primary); margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+    .mp-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); }
+    .mp-row:last-child { border-bottom: none; }
+    .mp-row-lbl { font-size: 13px; color: var(--text-primary); font-weight: 600; }
+    .mp-row-val { font-size: 13px; color: var(--text-secondary); font-weight: 700; }
+    .mp-bar-outer { width: 100px; height: 6px; background: var(--border); border-radius: 99px; overflow: hidden; margin-left: 12px; flex-shrink: 0; }
+    .mp-bar-inner { height: 100%; background: var(--primary); border-radius: 99px; transition: width .5s; }
+    .mp-empty { font-size: 13px; color: var(--text-secondary); font-style: italic; padding: 20px 0; text-align: center; }
+    .mp-reset-area { margin-top: 18px; padding-top: 18px; border-top: 1px solid var(--border); }
+    .mp-reset-btn {
+      background: transparent; color: #c0392b; border: 1.5px solid #f5c6d0;
+      border-radius: 99px; padding: 8px 18px; font-size: 12px; font-weight: 600; cursor: pointer;
+      transition: all var(--transition);
+    }
+    .mp-reset-btn:hover { background: #fbe5e5; border-color: #c0392b; }
+
+    /* ── Responsive ── */
+    @media (max-width: 1280px) {
+      .stats-grid { grid-template-columns: repeat(2,1fr); }
+      .tools-grid { grid-template-columns: 1fr 1fr; }
+      .calc-grid  { grid-template-columns: 1fr; }
+      .mp-grid    { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 900px) {
+      .sidebar { width: 200px; }
+      .header  { padding: 14px 20px; }
+      .page    { padding: 24px 20px; }
+      .um-panel { width: 100%; }
+      .tools-grid { grid-template-columns: 1fr; }
+      .comp-selectors { grid-template-columns: 1fr; }
+      .arbol-info-grid { grid-template-columns: 1fr; }
+      .quiz-runner, .quiz-intro, .fc-intro, .quiz-result-card { padding: 22px 18px; }
+      .quiz-question { font-size: 16px; }
+      .fc-face { padding: 28px 22px; }
+      .fc-face-content { font-size: 16px; }
+      .search-input { width: 160px; }
+      .search-input:focus { width: 200px; }
+    }
+    @media (max-width: 768px) {
+      body { flex-direction: column; }
+      .sidebar { width: 100%; min-height: unset; height: auto; position: static; flex-direction: row; flex-wrap: wrap; }
+      .sidebar-brand { padding: 14px 18px; flex-shrink: 0; }
+      .brand-icon { width: 30px; height: 30px; font-size: 16px; margin-bottom: 4px; }
+      .sidebar-footer { display: none; }
+      .sidebar-nav { display: flex; flex-direction: row; padding: 0; overflow-x: auto; flex: 1; align-items: stretch; }
+      .nav-section-label { display: none; }
+      .nav-item { padding: 12px 14px; font-size: 12px; border-left: none; border-bottom: 3px solid transparent; white-space: nowrap; }
+      .nav-item.active { border-left: none; border-bottom-color: var(--primary); }
+      .header { padding: 12px 16px; min-height: 64px; flex-wrap: wrap; gap: 10px; }
+      .header-left h1 { font-size: 16px; }
+      .header-meta { display: none; }
+      .header-right .progress-wrap { display: none; }
+      .search-input { width: 130px; font-size: 12px; }
+      .search-input:focus { width: 180px; }
+      .page { padding: 18px 14px; }
+      .page-subtitle { font-size: 20px; margin-bottom: 18px; }
+      .units-grid { grid-template-columns: 1fr; }
+      .stats-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+      .stat-card { padding: 14px; }
+      .stat-value { font-size: 20px; }
+      .tools-grid { grid-template-columns: 1fr; }
+      .um-panel { width: 100%; }
+      .um-header { padding: 16px 18px; gap: 10px; }
+      .um-header-text h2 { font-size: 15px; }
+      .um-tabs { padding: 0 14px; }
+      .um-tab { padding: 12px 10px; font-size: 12px; }
+      .um-content { padding: 18px 16px; }
+      .um-print { padding: 6px 10px; font-size: 11px; }
+      .quiz-units-grid { grid-template-columns: 1fr; }
+      .quiz-runner-meta { flex-wrap: wrap; gap: 8px; }
+      .quiz-actions { justify-content: stretch; }
+      .quiz-actions button { flex: 1; }
+      .fc-controls { gap: 8px; }
+      .fc-controls .fc-btn { font-size: 12px; padding: 9px 14px; }
+      .ref-table td { padding: 10px 14px; font-size: 12.5px; }
+      .comp-table th, .comp-table td { padding: 10px 12px; font-size: 12px; }
+      table { font-size: 12px !important; }
+      .um-content table th, .um-content table td { padding: 6px 8px !important; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── Sidebar ── -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-icon">🩸</div>
+      <div class="brand-name">Hematología</div>
+      <div class="brand-sub">Tecnología Médica · UST</div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Estudio</div>
+      <div class="nav-item active" data-section="dashboard" onclick="showSection('dashboard',this)">
+        <span class="nav-icon">📚</span> Unidades
+      </div>
+      <div class="nav-item" data-section="flashcards" onclick="showSection('flashcards',this)">
+        <span class="nav-icon">🃏</span> Flashcards
+      </div>
+      <div class="nav-item" data-section="quiz" onclick="showSection('quiz',this)">
+        <span class="nav-icon">✏️</span> Quiz
+      </div>
+      <div class="nav-section-label">Herramientas</div>
+      <div class="nav-item" data-section="arbol" onclick="showSection('arbol',this)">
+        <span class="nav-icon">🌳</span> Árbol Diagnóstico
+      </div>
+      <div class="nav-item" data-section="comparador" onclick="showSection('comparador',this)">
+        <span class="nav-icon">⚖️</span> Comparador
+      </div>
+      <div class="nav-item" data-section="calculadora" onclick="showSection('calculadora',this)">
+        <span class="nav-icon">🧮</span> Calculadora
+      </div>
+      <div class="nav-item" data-section="biblioteca" onclick="showSection('biblioteca',this)">
+        <span class="nav-icon">📖</span> Biblioteca
+      </div>
+      <div class="nav-section-label">Seguimiento</div>
+      <div class="nav-item" data-section="progreso" onclick="showSection('progreso',this)">
+        <span class="nav-icon">📊</span> Mi Progreso
+      </div>
+    </nav>
+    <div class="sidebar-footer">Semestre 1 · 2025</div>
+  </aside>
+
+  <!-- ── Main ── -->
+  <div class="main">
+    <header class="header">
+      <div class="header-left">
+        <h1>Hematología Clínica</h1>
+        <div class="header-meta">Universidad Santo Tomás · Semestre 1, 2025</div>
+      </div>
+      <div class="header-right">
+        <button class="dark-toggle" id="darkToggle" onclick="toggleDark()" title="Modo oscuro/claro" aria-label="Alternar modo oscuro"></button>
+        <div class="search-wrap">
+          <span class="search-icon">🔍</span>
+          <input class="search-input" id="searchInput" type="text" placeholder="Buscar en unidades…" oninput="doSearch(this.value)" onblur="setTimeout(()=>closeSearch(),200)">
+          <div class="search-results" id="searchResults"></div>
+        </div>
+        <div class="progress-wrap">
+          <span class="progress-label">Progreso global</span>
+          <div class="progress-bar-outer">
+            <div class="progress-bar-inner" id="globalProgress"></div>
+          </div>
+          <span class="progress-pct" id="globalPct">0%</span>
+        </div>
+      </div>
+    </header>
+
+    <main class="page">
+
+      <!-- ══ DASHBOARD ══ -->
+      <div id="section-dashboard" class="app-section active">
+        <div class="page-title">Plan de estudio</div>
+        <div class="page-subtitle">Unidades temáticas</div>
+
+        <div class="units-grid">
+          <div class="unit-card" data-unit="1" onclick="openUnit(1)">
+            <div class="unit-card-top">
+              <div class="unit-number-badge">U1</div>
+              <div class="unit-info">
+                <div class="unit-title">Anemias y Trastornos Hemorrágicos</div>
+                <div class="unit-subtitle">Von Willebrand · Hemofilias · Anemias</div>
+                <div class="unit-tags">
+                  <span class="badge badge-medio">Medio</span>
+                  <span class="badge badge-tiempo">⏱ 3 hrs</span>
+                </div>
+              </div>
+            </div>
+            <div class="unit-progress-wrap">
+              <div class="unit-progress-bar-outer"><div class="unit-progress-bar-inner" id="prog-1"></div></div>
+              <div class="unit-progress-label" id="prog-label-1">0 de 4 secciones visitadas</div>
+            </div>
+            <div class="unit-card-footer"><span class="unit-link">ver detalle →</span></div>
+          </div>
+
+          <div class="unit-card" data-unit="2" onclick="openUnit(2)">
+            <div class="unit-card-top">
+              <div class="unit-number-badge">U2</div>
+              <div class="unit-info">
+                <div class="unit-title">Patología Leucocitaria</div>
+                <div class="unit-subtitle">Leucemias · Linfomas · SMD</div>
+                <div class="unit-tags">
+                  <span class="badge badge-dificil">Difícil</span>
+                  <span class="badge badge-tiempo">⏱ 4 hrs</span>
+                </div>
+              </div>
+            </div>
+            <div class="unit-progress-wrap">
+              <div class="unit-progress-bar-outer"><div class="unit-progress-bar-inner" id="prog-2"></div></div>
+              <div class="unit-progress-label" id="prog-label-2">0 de 4 secciones visitadas</div>
+            </div>
+            <div class="unit-card-footer"><span class="unit-link">ver detalle →</span></div>
+          </div>
+
+          <div class="unit-card" data-unit="3" onclick="openUnit(3)">
+            <div class="unit-card-top">
+              <div class="unit-number-badge">U3</div>
+              <div class="unit-info">
+                <div class="unit-title">Neoplasias Mieloproliferativas</div>
+                <div class="unit-subtitle">LMC · NMP · Leucemia Mieloide Crónica</div>
+                <div class="unit-tags">
+                  <span class="badge badge-dificil">Difícil</span>
+                  <span class="badge badge-tiempo">⏱ 4 hrs</span>
+                </div>
+              </div>
+            </div>
+            <div class="unit-progress-wrap">
+              <div class="unit-progress-bar-outer"><div class="unit-progress-bar-inner" id="prog-3"></div></div>
+              <div class="unit-progress-label" id="prog-label-3">0 de 4 secciones visitadas</div>
+            </div>
+            <div class="unit-card-footer"><span class="unit-link">ver detalle →</span></div>
+          </div>
+
+          <div class="unit-card" data-unit="lab" onclick="openUnit('lab')">
+            <div class="unit-card-top">
+              <div class="unit-number-badge">LAB</div>
+              <div class="unit-info">
+                <div class="unit-title">Laboratorio Hematológico</div>
+                <div class="unit-subtitle">Hemograma · Morfología · Valores de referencia</div>
+                <div class="unit-tags">
+                  <span class="badge badge-esencial">Esencial</span>
+                  <span class="badge badge-tiempo">⏱ 2 hrs</span>
+                </div>
+              </div>
+            </div>
+            <div class="unit-progress-wrap">
+              <div class="unit-progress-bar-outer"><div class="unit-progress-bar-inner" id="prog-lab"></div></div>
+              <div class="unit-progress-label" id="prog-label-lab">0 de 4 secciones visitadas</div>
+            </div>
+            <div class="unit-card-footer"><span class="unit-link">ver detalle →</span></div>
+          </div>
+        </div>
+
+        <!-- Estadísticas -->
+        <div class="section-gap">
+          <div class="section-heading">📈 Estadísticas de estudio</div>
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-icon">📚</div>
+              <div class="stat-value"><span id="stat-units-done">0</span><span style="font-size:14px;color:var(--text-secondary)">/4</span></div>
+              <div class="stat-label">Unidades completadas</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon" style="background:#f0e8fb">✏️</div>
+              <div class="stat-value" id="stat-quiz-count">0</div>
+              <div class="stat-label">Quizzes realizados</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon" style="background:#fde8c0">🃏</div>
+              <div class="stat-value" id="stat-fc-count">0</div>
+              <div class="stat-label">Flashcards dominadas</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon" style="background:#e8f6ed">🎯</div>
+              <div class="stat-value" id="stat-quiz-best">—</div>
+              <div class="stat-label">Mejor puntaje quiz</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Herramientas rápidas -->
+        <div class="section-gap">
+          <div class="section-heading">🔧 Estudio activo</div>
+          <div class="tools-grid">
+            <div class="tool-card">
+              <div class="tool-icon" style="background:#f0e8fb">✏️</div>
+              <div class="tool-title">Quiz interactivo</div>
+              <div class="tool-desc">50 preguntas con alternativas. Feedback inmediato, puntaje y mejores marcas guardadas por unidad.</div>
+              <button class="tool-btn" onclick="showSection('quiz',document.querySelector('[data-section=quiz]'))">Empezar quiz</button>
+            </div>
+            <div class="tool-card">
+              <div class="tool-icon" style="background:#fde8c0">🃏</div>
+              <div class="tool-title">Flashcards</div>
+              <div class="tool-desc">Tarjetas de repaso rápido por unidad. Marca lo que dominas y revisa lo que falta.</div>
+              <button class="tool-btn" onclick="showSection('flashcards',document.querySelector('[data-section=flashcards]'))">Repasar</button>
+            </div>
+            <div class="tool-card">
+              <div class="tool-icon tool-icon-arbol">🌳</div>
+              <div class="tool-title">Árbol Diagnóstico</div>
+              <div class="tool-desc">Identifica el tipo de anemia siguiendo un flujo clínico interactivo paso a paso.</div>
+              <button class="tool-btn" onclick="showSection('arbol',document.querySelector('[data-section=arbol]'))">Abrir árbol</button>
+            </div>
+            <div class="tool-card">
+              <div class="tool-icon tool-icon-comp">⚖️</div>
+              <div class="tool-title">Comparador</div>
+              <div class="tool-desc">Compara dos patologías lado a lado con tabla de diferencias clave para el certamen.</div>
+              <button class="tool-btn" onclick="showSection('comparador',document.querySelector('[data-section=comparador]'))">Comparar</button>
+            </div>
+            <div class="tool-card">
+              <div class="tool-icon tool-icon-calc">🧮</div>
+              <div class="tool-title">Calculadora</div>
+              <div class="tool-desc">Calcula índices hematológicos: Mentzer, reticulocitos corregidos, saturación de transferrina.</div>
+              <button class="tool-btn" onclick="showSection('calculadora',document.querySelector('[data-section=calculadora]'))">Calcular</button>
+            </div>
+            <div class="tool-card">
+              <div class="tool-icon" style="background:#e8f3fb">📖</div>
+              <div class="tool-title">Biblioteca</div>
+              <div class="tool-desc">16 documentos indexados con resúmenes: guías clínicas, capítulos de libro y material de clase.</div>
+              <button class="tool-btn" onclick="showSection('biblioteca',document.querySelector('[data-section=biblioteca]'))">Ver biblioteca</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Valores de referencia -->
+        <div class="section-gap">
+          <div class="ref-panel">
+            <div class="ref-header" onclick="toggleRef()">
+              <div class="ref-header-left"><span>🔬</span><h3>Valores de referencia rápida</h3></div>
+              <span class="ref-chevron" id="refChevron">▼</span>
+            </div>
+            <div class="ref-body" id="refBody">
+              <table class="ref-table">
+                <tr><td>Hemoglobina</td><td>H &gt;13 g/dL &nbsp;·&nbsp; M &gt;12 g/dL</td></tr>
+                <tr><td>Plaquetas</td><td>150.000 – 400.000 /µL</td></tr>
+                <tr><td>Leucocitos</td><td>4.500 – 11.000 /µL</td></tr>
+                <tr><td>VCM</td><td>80 – 100 fL</td></tr>
+                <tr><td>HCM</td><td>27 – 33 pg</td></tr>
+                <tr><td>Ferritina</td><td>H: 30–300 ng/mL &nbsp;·&nbsp; M: 15–200 ng/mL</td></tr>
+                <tr><td>Reticulocitos</td><td>0,5 – 1,5%</td></tr>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tip del día -->
+        <div class="section-gap">
+          <div class="tip-card">
+            <div class="tip-icon">💡</div>
+            <div>
+              <div class="tip-label">Tip del día</div>
+              <div class="tip-text" id="tipText">Cargando…</div>
+            </div>
+          </div>
+        </div>
+      </div><!-- /dashboard -->
+
+      <!-- ══ BIBLIOTECA ══ -->
+      <div id="section-biblioteca" class="app-section">
+        <div class="page-title">Recursos de estudio</div>
+        <div class="page-subtitle">Biblioteca de documentos</div>
+        <div class="lib-filters">
+          <button class="lib-filter-btn active" onclick="filterLib('all',this)">Todos</button>
+          <button class="lib-filter-btn" onclick="filterLib('u1',this)">Unidad 1</button>
+          <button class="lib-filter-btn" onclick="filterLib('u2',this)">Unidad 2</button>
+          <button class="lib-filter-btn" onclick="filterLib('u3',this)">Unidad 3</button>
+          <button class="lib-filter-btn" onclick="filterLib('lab',this)">Laboratorio</button>
+          <button class="lib-filter-btn" onclick="filterLib('libros',this)">Libros</button>
+        </div>
+        <div class="lib-grid" id="libGrid"></div>
+      </div>
+
+      <!-- ══ ÁRBOL DIAGNÓSTICO ══ -->
+      <div id="section-arbol" class="app-section">
+        <div class="page-title">Herramienta clínica</div>
+        <div class="page-subtitle">Árbol diagnóstico de anemias</div>
+        <div class="arbol-container">
+          <div id="arbolContent"></div>
+        </div>
+      </div>
+
+      <!-- ══ COMPARADOR ══ -->
+      <div id="section-comparador" class="app-section">
+        <div class="page-title">Herramienta clínica</div>
+        <div class="page-subtitle">Comparador de patologías</div>
+        <div class="comp-selectors">
+          <div>
+            <div class="comp-sel-label">Patología A</div>
+            <select class="comp-select comp-select-a" id="compA" onchange="renderComparador()">
+              <option value="">— Seleccionar —</option>
+              <option value="ferropenica">Anemia ferropénica</option>
+              <option value="megaloblastica">Anemia megaloblástica</option>
+              <option value="hemolitica">Anemia hemolítica</option>
+              <option value="pti">PTI</option>
+              <option value="hit">HIT</option>
+              <option value="trombocitosis">Trombocitosis esencial</option>
+              <option value="hemofiliaa">Hemofilia A</option>
+              <option value="hemofiliab">Hemofilia B</option>
+              <option value="vw">Enfermedad de Von Willebrand</option>
+            </select>
+          </div>
+          <div>
+            <div class="comp-sel-label">Patología B</div>
+            <select class="comp-select comp-select-b" id="compB" onchange="renderComparador()">
+              <option value="">— Seleccionar —</option>
+              <option value="ferropenica">Anemia ferropénica</option>
+              <option value="megaloblastica">Anemia megaloblástica</option>
+              <option value="hemolitica">Anemia hemolítica</option>
+              <option value="pti">PTI</option>
+              <option value="hit">HIT</option>
+              <option value="trombocitosis">Trombocitosis esencial</option>
+              <option value="hemofiliaa">Hemofilia A</option>
+              <option value="hemofiliab">Hemofilia B</option>
+              <option value="vw">Enfermedad de Von Willebrand</option>
+            </select>
+          </div>
+        </div>
+        <div class="comp-table-wrap" id="compResult">
+          <div class="comp-placeholder"><div class="comp-ph-icon">⚖️</div>Selecciona dos patologías para comparar</div>
+        </div>
+      </div>
+
+      <!-- ══ CALCULADORA ══ -->
+      <div id="section-calculadora" class="app-section">
+        <div class="page-title">Herramienta clínica</div>
+        <div class="page-subtitle">Calculadora de índices hematológicos</div>
+        <div class="calc-grid">
+          <div class="calc-fields">
+            <div class="calc-group">
+              <label class="calc-label">Hemoglobina (g/dL)</label>
+              <input class="calc-input" id="cHb" type="number" step="0.1" placeholder="ej. 12.5">
+            </div>
+            <div class="calc-group">
+              <label class="calc-label">VCM (fL)</label>
+              <input class="calc-input" id="cVcm" type="number" step="0.1" placeholder="ej. 75">
+            </div>
+            <div class="calc-group">
+              <label class="calc-label">Glóbulos rojos — GR (millones/µL)</label>
+              <input class="calc-input" id="cGr" type="number" step="0.01" placeholder="ej. 4.5">
+            </div>
+            <div class="calc-group">
+              <label class="calc-label">HCM (pg)</label>
+              <input class="calc-input" id="cHcm" type="number" step="0.1" placeholder="ej. 28">
+            </div>
+            <div class="calc-group">
+              <label class="calc-label">Reticulocitos (%)</label>
+              <input class="calc-input" id="cRetic" type="number" step="0.1" placeholder="ej. 1.2">
+            </div>
+            <div class="calc-group">
+              <label class="calc-label">Hierro sérico (µg/dL)</label>
+              <input class="calc-input" id="cFe" type="number" step="1" placeholder="ej. 60">
+            </div>
+            <div class="calc-group">
+              <label class="calc-label">TIBC (µg/dL)</label>
+              <input class="calc-input" id="cTibc" type="number" step="1" placeholder="ej. 380">
+            </div>
+            <div class="calc-group">
+              <label class="calc-label">Plaquetas (/µL)</label>
+              <input class="calc-input" id="cPlaq" type="number" step="1000" placeholder="ej. 250000">
+            </div>
+            <button class="calc-btn" onclick="calcular()">Calcular índices</button>
+          </div>
+          <div class="calc-results" id="calcResults">
+            <div class="calc-empty">
+              <div class="calc-empty-icon">🧮</div>
+              Ingresa los valores y presiona calcular
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ QUIZ ══ -->
+      <div id="section-quiz" class="app-section">
+        <div class="page-title">Estudio activo</div>
+        <div class="page-subtitle">Quiz interactivo</div>
+        <div id="quizContent"></div>
+      </div>
+
+      <!-- ══ FLASHCARDS ══ -->
+      <div id="section-flashcards" class="app-section">
+        <div class="page-title">Estudio activo</div>
+        <div class="page-subtitle">Flashcards</div>
+        <div id="fcContent"></div>
+      </div>
+
+      <!-- ══ MI PROGRESO ══ -->
+      <div id="section-progreso" class="app-section">
+        <div class="page-title">Seguimiento</div>
+        <div class="page-subtitle">Mi progreso</div>
+        <div id="mpContent"></div>
+      </div>
+
+    </main>
+  </div><!-- /main -->
+
+  <!-- ── Biblioteca modal ── -->
+  <div class="lib-modal-overlay" id="libModalOverlay" onclick="if(event.target===this)closeLibModal()">
+    <div class="lib-modal">
+      <div class="lib-modal-header">
+        <div class="lib-modal-title" id="libModalTitle"></div>
+        <button class="lib-modal-close" onclick="closeLibModal()">✕</button>
+      </div>
+      <div id="libModalBody"></div>
+    </div>
+  </div>
+
+  <!-- ── Modal ── -->
+  <div class="um-overlay" id="umOverlay" onclick="closeUnit()"></div>
+  <div class="um-panel" id="umPanel">
+    <div class="um-header">
+      <div class="um-unit-badge" id="umBadge"></div>
+      <div class="um-header-text">
+        <h2 id="umTitle"></h2>
+        <p id="umSubtitle"></p>
+      </div>
+      <button class="um-print" onclick="printUnit()" title="Exportar PDF estructurado">⬇ PDF</button>
+      <button class="um-close" onclick="closeUnit()" aria-label="Cerrar">✕</button>
+    </div>
+    <div class="um-tabs">
+      <button class="um-tab active" onclick="switchTab('conceptos')">Conceptos</button>
+      <button class="um-tab"        onclick="switchTab('valores')">Valores de referencia</button>
+      <button class="um-tab"        onclick="switchTab('casos')">Casos clínicos</button>
+      <button class="um-tab"        onclick="switchTab('notas')">Notas</button>
+      <button class="um-tab"        onclick="switchTab('mapa')">Mapa conceptual</button>
+    </div>
+    <div class="um-content" id="umContent"></div>
+  </div>
+
+  <script src="assets/unit_details.js"></script>
+  <script src="assets/library_data.js"></script>
+  <script>
+  /* ═══════════════════════ DARK MODE ═══════════════════════ */
+  function toggleDark() {
+    document.body.classList.toggle('dark');
+    localStorage.setItem('hc-dark', document.body.classList.contains('dark') ? '1' : '0');
+  }
+  if (localStorage.getItem('hc-dark') === '1') {
+    document.body.classList.add('dark');
+  }
+
+  /* ═══════════════════════ NAVIGATION ═══════════════════════ */
+  function showSection(name, navEl) {
+    document.querySelectorAll('.app-section').forEach(s => s.classList.remove('active'));
+    document.getElementById('section-' + name).classList.add('active');
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    if (navEl) navEl.classList.add('active');
+    if (name === 'arbol') initArbol();
+    if (name === 'biblioteca') renderLib('all');
+  }
+
+  /* ═══════════════════════ UNIT PROGRESS ═══════════════════════ */
+  const TABS_ALL = ['conceptos','valores','casos','notas'];
+  function getProgress(uid) {
+    const key = 'hc-progress-' + uid;
+    try { return JSON.parse(localStorage.getItem(key)) || []; } catch { return []; }
+  }
+  function markVisit(uid, tab) {
+    const visited = getProgress(uid);
+    if (!visited.includes(tab)) {
+      visited.push(tab);
+      localStorage.setItem('hc-progress-' + uid, JSON.stringify(visited));
+    }
+    renderProgress(uid);
+    updateGlobalProgress();
+  }
+  function renderProgress(uid) {
+    const visited = getProgress(uid);
+    const pct = Math.round((visited.length / 4) * 100);
+    const key = String(uid);
+    const bar = document.getElementById('prog-' + key);
+    const lbl = document.getElementById('prog-label-' + key);
+    if (bar) bar.style.width = pct + '%';
+    if (lbl) lbl.textContent = visited.length + ' de 4 secciones visitadas';
+  }
+  function updateGlobalProgress() {
+    const units = [1, 2, 3, 'lab'];
+    let total = 0;
+    units.forEach(u => { total += getProgress(u).length; });
+    const pct = Math.round((total / 16) * 100);
+    document.getElementById('globalProgress').style.width = pct + '%';
+    document.getElementById('globalPct').textContent = pct + '%';
+  }
+  ['1','2','3','lab'].forEach(u => renderProgress(u));
+  updateGlobalProgress();
+
+  /* ═══════════════════════ BÚSQUEDA ═══════════════════════ */
+  const SEARCH_INDEX = [];
+  function buildSearchIndex() {
+    if (!window.UNIT_DETAIL) return;
+    const unitLabels = { 1:'U1 — Anemias y Trastornos Hemorrágicos', 2:'U2 — Patología Leucocitaria', 3:'U3 — Neoplasias Mieloproliferativas', lab:'LAB — Laboratorio Hematológico' };
+    const tabLabels = { conceptos:'Conceptos', valores:'Valores de referencia', casos:'Casos clínicos', notas:'Notas' };
+    Object.keys(window.UNIT_DETAIL).forEach(uid => {
+      Object.keys(tabLabels).forEach(tab => {
+        const html = window.UNIT_DETAIL[uid][tab] || '';
+        const text = html.replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim();
+        const sentences = text.split(/[.;·\n]/).filter(s => s.trim().length > 20);
+        sentences.forEach(s => {
+          SEARCH_INDEX.push({ uid, tab, unit: unitLabels[uid] || uid, tabLabel: tabLabels[tab], text: s.trim() });
+        });
+      });
+    });
+  }
+  buildSearchIndex();
+
+  function doSearch(q) {
+    const box = document.getElementById('searchResults');
+    if (!q || q.length < 3) { box.classList.remove('open'); return; }
+    const lq = q.toLowerCase();
+    const results = SEARCH_INDEX.filter(item => item.text.toLowerCase().includes(lq)).slice(0, 8);
+    if (!results.length) {
+      box.innerHTML = '<div class="search-empty">Sin resultados para "' + q + '"</div>';
+    } else {
+      box.innerHTML = results.map(r => {
+        const hl = r.text.replace(new RegExp(q, 'gi'), m => '<span class="search-highlight">' + m + '</span>');
+        return '<div class="search-result-item" onclick="openUnit(' + (isNaN(r.uid) ? "'"+r.uid+"'" : r.uid) + ');switchTab(\''+r.tab+'\');closeSearch()">'
+          + '<div class="search-result-unit">' + r.unit + ' · ' + r.tabLabel + '</div>'
+          + '<div class="search-result-text">' + hl.substring(0,120) + '…</div>'
+          + '</div>';
+      }).join('');
+    }
+    box.classList.add('open');
+  }
+  function closeSearch() {
+    document.getElementById('searchResults').classList.remove('open');
+  }
+
+  /* ═══════════════════════ BIBLIOTECA ═══════════════════════ */
+  const LIB_TAG_COLORS = {
+    u1: {bg:'#fdeef3', color:'#c97a96'},
+    u2: {bg:'#f9e4ec', color:'#a0495e'},
+    u3: {bg:'#e8f6ed', color:'#3a8a5c'},
+    lab: {bg:'#e8f3fb', color:'#5a8fa8'},
+    libros: {bg:'#f0e8fb', color:'#7a5a9a'}
+  };
+  const LIB_TAG_LABELS = { u1:'Unidad 1', u2:'Unidad 2', u3:'Unidad 3', lab:'Laboratorio', libros:'Libros' };
+  let currentLibFilter = 'all';
+
+  function renderLib(filter) {
+    currentLibFilter = filter;
+    const grid = document.getElementById('libGrid');
+    if (!window.LIBRARY_DATA) { grid.innerHTML = '<p>Biblioteca no disponible.</p>'; return; }
+    const allItems = [];
+    Object.keys(window.LIBRARY_DATA).forEach(cat => {
+      window.LIBRARY_DATA[cat].forEach(item => allItems.push({ ...item, cat }));
+    });
+    const filtered = filter === 'all' ? allItems : allItems.filter(i => i.cat === filter);
+    grid.innerHTML = filtered.map((item, idx) => {
+      const tc = LIB_TAG_COLORS[item.cat] || {bg:'#eee',color:'#666'};
+      return `<div class="lib-card">
+        <span class="lib-unit-tag" style="background:${tc.bg};color:${tc.color}">${LIB_TAG_LABELS[item.cat] || item.cat}</span>
+        <div class="lib-card-name">${item.nombre}</div>
+        <button class="lib-card-btn" onclick="showLibResumen(${idx},'${filter}')">Ver resumen</button>
+      </div>`;
+    }).join('') || '<p style="color:var(--text-secondary);font-size:14px">No hay documentos en esta categoría.</p>';
+  }
+
+  function filterLib(filter, btn) {
+    document.querySelectorAll('.lib-filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    renderLib(filter);
+  }
+
+  function showLibResumen(idx, filter) {
+    const allItems = [];
+    Object.keys(window.LIBRARY_DATA).forEach(cat => {
+      window.LIBRARY_DATA[cat].forEach(item => allItems.push({ ...item, cat }));
+    });
+    const filtered = filter === 'all' ? allItems : allItems.filter(i => i.cat === filter);
+    const item = filtered[idx];
+    if (!item) return;
+    const overlay = document.getElementById('libModalOverlay');
+    document.getElementById('libModalTitle').textContent = item.nombre;
+    document.getElementById('libModalBody').innerHTML = item.resumen;
+    overlay.classList.add('open');
+  }
+  function closeLibModal() {
+    document.getElementById('libModalOverlay').classList.remove('open');
+  }
+
+  /* ═══════════════════════ MODAL ═══════════════════════ */
+  const UNIT_META = {
+    1:   { label:'U1',  title:'Anemias y Trastornos Hemorrágicos', subtitle:'Von Willebrand · Hemofilias · Anemias', badgeBg:'#fdeef3', badgeColor:'#c97a96' },
+    2:   { label:'U2',  title:'Patología Leucocitaria',            subtitle:'Leucemias · Linfomas · SMD',            badgeBg:'#f9e4ec', badgeColor:'#a0495e' },
+    3:   { label:'U3',  title:'Neoplasias Mieloproliferativas',    subtitle:'LMC · NMP · Leucemia Mieloide Crónica', badgeBg:'#e8f6ed', badgeColor:'#3a8a5c' },
+    lab: { label:'LAB', title:'Laboratorio Hematológico',          subtitle:'Hemograma · Morfología · Valores de referencia', badgeBg:'#e8f3fb', badgeColor:'#5a8fa8' }
+  };
+  let currentUnit = null, currentTab = 'conceptos';
+
+  function openUnit(id) {
+    const meta = UNIT_META[id]; if (!meta) return;
+    currentUnit = id; currentTab = 'conceptos';
+    const badge = document.getElementById('umBadge');
+    badge.textContent = meta.label; badge.style.background = meta.badgeBg; badge.style.color = meta.badgeColor;
+    document.getElementById('umTitle').textContent    = meta.title;
+    document.getElementById('umSubtitle').textContent = meta.subtitle;
+    document.querySelectorAll('.um-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.um-tab')[0].classList.add('active');
+    renderTab('conceptos');
+    document.getElementById('umOverlay').classList.add('open');
+    document.getElementById('umPanel').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeUnit() {
+    document.getElementById('umOverlay').classList.remove('open');
+    document.getElementById('umPanel').classList.remove('open');
+    document.body.style.overflow = ''; currentUnit = null;
+  }
+  /* Ancho nodo = 128px, padding interno = 10px, viewBox W = 520 */
+  const NW = 128, NP = 10;
+  const MAPA_DATA = {
+    1: { title:'U1 — Anemias y Trastornos Hemorrágicos', W:520, H:390, nodes:[
+      {id:'A',x:196,y:20, label:'Hemostasia Primaria',  color:'#fdeef3',tc:'#c97a96'},
+      {id:'B',x:30, y:110,label:'Plaquetas',             color:'#fdeef3',tc:'#c97a96'},
+      {id:'C',x:362,y:110,label:'FvW',                   color:'#fdeef3',tc:'#c97a96'},
+      {id:'D',x:10, y:215,label:'Trombocitopenias\n(PTI · HIT)',color:'#f9e4ec',tc:'#a0495e'},
+      {id:'E',x:196,y:215,label:'Trombocitosis\nClonal vs Reactiva',color:'#fde8c0',tc:'#b8860b'},
+      {id:'F',x:372,y:215,label:'EvW · Glanzmann\nBernard Soulier',color:'#c8e6c9',tc:'#2e7d32'},
+      {id:'G',x:80, y:320,label:'Hemofilias\nA · B · C',  color:'#e8f3fb',tc:'#5a8fa8'},
+      {id:'H',x:300,y:320,label:'Anemias\nMicro·Normo·Macro',color:'#e8f3fb',tc:'#5a8fa8'}
+    ], edges:[['A','B'],['A','C'],['B','D'],['B','E'],['C','F'],['A','G'],['A','H']]},
+    2: { title:'U2 — Patología Leucocitaria', W:520, H:405, nodes:[
+      {id:'A',x:196,y:20, label:'Leucemias Agudas',       color:'#fdeef3',tc:'#c97a96'},
+      {id:'B',x:30, y:115,label:'LMA\n≥20% blastos',      color:'#f9e4ec',tc:'#a0495e'},
+      {id:'C',x:362,y:115,label:'LLA\n≥25% blastos',      color:'#fde8c0',tc:'#b8860b'},
+      {id:'D',x:10, y:225,label:'Bastones de Auer\ncMPO+',color:'#f9e4ec',tc:'#a0495e'},
+      {id:'E',x:196,y:225,label:'Sd. Mononucleosico\nEBV·CMV·Hanta',color:'#c8e6c9',tc:'#2e7d32'},
+      {id:'F',x:372,y:225,label:'LLA-B: CD19+\nLLA-T: CD3+',color:'#fde8c0',tc:'#b8860b'},
+      {id:'G',x:90, y:325,label:'Heterófilos (+)\nEBV',   color:'#e8f3fb',tc:'#5a8fa8'},
+      {id:'H',x:285,y:325,label:'Inmunoblastos\nHanta ≥10%',color:'#e8f3fb',tc:'#5a8fa8'}
+    ], edges:[['A','B'],['A','C'],['B','D'],['A','E'],['C','F'],['E','G'],['E','H']]},
+    3: { title:'U3 — Neoplasias Mieloproliferativas', W:520, H:400, nodes:[
+      {id:'A',x:196,y:18, label:'NMP Crónicas',            color:'#e8f6ed',tc:'#3a8a5c'},
+      {id:'B',x:10, y:110,label:'LMC Phi+\nt(9;22) BCR-ABL',color:'#d8f0e0',tc:'#1a7a3a'},
+      {id:'C',x:196,y:110,label:'Policitemia Vera\nJAK2 V617F',color:'#fdeef3',tc:'#c97a96'},
+      {id:'D',x:382,y:110,label:'TE · Mielofibrosis\nJAK2/CALR/MPL',color:'#fde8c0',tc:'#b8860b'},
+      {id:'E',x:10, y:222,label:'SLP Maduros B\nLLC · HCL', color:'#e8f3fb',tc:'#5a8fa8'},
+      {id:'F',x:196,y:222,label:'Linfomas B\nFolicular · Manto',color:'#f9e4ec',tc:'#a0495e'},
+      {id:'G',x:382,y:222,label:'SLP T\nLGG · MF · Sézary',color:'#e8f6ed',tc:'#3a8a5c'},
+      {id:'H',x:80, y:325,label:'Score Matutes\nGumprecht',  color:'#e8f3fb',tc:'#5a8fa8'},
+      {id:'I',x:290,y:325,label:'t(14;18) BCL2\nt(11;14) CiclinaD1',color:'#f9e4ec',tc:'#a0495e'}
+    ], edges:[['A','B'],['A','C'],['A','D'],['A','E'],['A','F'],['A','G'],['E','H'],['F','I']]},
+    lab: { title:'LAB — Laboratorio Hematológico', W:520, H:395, nodes:[
+      {id:'A',x:196,y:18, label:'Hemograma\nAutomatizado',   color:'#e8f3fb',tc:'#5a8fa8'},
+      {id:'B',x:10, y:110,label:'Impedancia\n(Coulter)',      color:'#e8f3fb',tc:'#5a8fa8'},
+      {id:'C',x:196,y:110,label:'Light Scattering\n(Sysmex)',color:'#e8f3fb',tc:'#5a8fa8'},
+      {id:'D',x:382,y:110,label:'Colorimetría\nHemoglobina', color:'#e8f3fb',tc:'#5a8fa8'},
+      {id:'E',x:10, y:222,label:'GR · Plaquetas\nVCM · ADE', color:'#fdeef3',tc:'#c97a96'},
+      {id:'F',x:196,y:222,label:'Fórmula leucocitaria\n5 poblaciones',color:'#c8e6c9',tc:'#2e7d32'},
+      {id:'G',x:382,y:222,label:'HGB · Hcto\nCalibración',   color:'#fde8c0',tc:'#b8860b'},
+      {id:'H',x:80, y:325,label:'Morfología\nFrotis · MGG',  color:'#fdeef3',tc:'#c97a96'},
+      {id:'I',x:290,y:325,label:'Valores críticos\nInforme urgente',color:'#f5c6d0',tc:'#c0392b'}
+    ], edges:[['A','B'],['A','C'],['A','D'],['B','E'],['C','F'],['D','G'],['F','H'],['E','I']]}
+  };
+
+  function switchTab(tab) {
+    currentTab = tab;
+    document.querySelectorAll('.um-tab').forEach(t => t.classList.remove('active'));
+    const idx = {conceptos:0,valores:1,casos:2,notas:3,mapa:4};
+    const tabBtn = document.querySelectorAll('.um-tab')[idx[tab]];
+    if (tabBtn) tabBtn.classList.add('active');
+    renderTab(tab);
+    if (currentUnit && TABS_ALL.includes(tab)) markVisit(currentUnit, tab);
+  }
+  function renderTab(tab) {
+    const el = document.getElementById('umContent');
+    if (tab === 'mapa') {
+      el.innerHTML = renderMapa(currentUnit);
+      el.scrollTop = 0;
+      return;
+    }
+    const data = window.UNIT_DETAIL && window.UNIT_DETAIL[currentUnit];
+    el.innerHTML = data ? (data[tab] || '<p>Sin contenido para esta sección.</p>') : '<p>Contenido no disponible.</p>';
+    el.scrollTop = 0;
+  }
+
+  function nodeHeight(n) { return NP * 2 + n.label.split('\n').length * 16; }
+  function nodeCx(n)     { return n.x + NW / 2; }
+  function nodeCy(n)     { return n.y + nodeHeight(n) / 2; }
+
+  function renderMapa(uid) {
+    const m = MAPA_DATA[uid];
+    if (!m) return '<p style="color:var(--text-secondary)">Mapa conceptual próximamente para esta unidad.</p>';
+    const W = m.W || 520, H = m.H || 400;
+
+    const edgeSvg = m.edges.map(([a,b]) => {
+      const na = m.nodes.find(n=>n.id===a), nb = m.nodes.find(n=>n.id===b);
+      if (!na||!nb) return '';
+      return `<line x1="${nodeCx(na)}" y1="${nodeCy(na)}" x2="${nodeCx(nb)}" y2="${nodeCy(nb)}" stroke="#e8a4b8" stroke-width="1.5" stroke-dasharray="4,3" opacity="0.65"/>`;
+    }).join('');
+
+    const nodeSvg = m.nodes.map(n => {
+      const lines = n.label.split('\n');
+      const nh = nodeHeight(n);
+      const cx = NW / 2;
+      const textEls = lines.map((l,i) =>
+        `<text x="${cx}" y="${NP + 13 + i * 16}" font-size="11" fill="${n.tc}" text-anchor="middle" font-family="Segoe UI,sans-serif" font-weight="${i===0?700:400}">${l}</text>`
+      ).join('');
+      return `<g transform="translate(${n.x},${n.y})">
+        <rect x="0" y="0" width="${NW}" height="${nh}" rx="11" fill="${n.color}" stroke="${n.tc}" stroke-width="1.5"/>
+        ${textEls}
+      </g>`;
+    }).join('');
+
+    return `<div class="mapa-svg-wrap">
+      <p style="font-size:13px;color:var(--text-secondary);margin:0 0 14px;font-weight:600">${m.title}</p>
+      <svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:560px;display:block">
+        ${edgeSvg}${nodeSvg}
+      </svg>
+    </div>`;
+  }
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeUnit(); });
+
+  /* ═══════════════════════ PRINT / PDF ═══════════════════════ */
+  function printUnit() {
+    if (!currentUnit) return;
+    const meta = UNIT_META[currentUnit];
+    const data = window.UNIT_DETAIL && window.UNIT_DETAIL[currentUnit];
+    if (!meta || !data) return;
+
+    const ACCENT = meta.badgeColor || '#c97a96';
+    const ACCENT_BG = meta.badgeBg  || '#fdeef3';
+
+    const tabDefs = [
+      { key:'conceptos', label:'Conceptos'              },
+      { key:'valores',   label:'Valores de referencia'  },
+      { key:'casos',     label:'Casos clínicos'         },
+      { key:'notas',     label:'Notas para el certamen' },
+    ];
+
+    const sections = tabDefs.map((t,i) => `
+      <section class="ps" style="${i>0?'page-break-before:always':''}">
+        <div class="ps-head" style="border-left:5px solid ${ACCENT}">
+          <span class="ps-num">${i+1}</span>
+          <span class="ps-title">${t.label}</span>
+        </div>
+        <div class="ps-body">${data[t.key] || '<p>Sin contenido.</p>'}</div>
+      </section>`).join('') + `
+      <section class="ps" style="page-break-before:always">
+        <div class="ps-head" style="border-left:5px solid ${ACCENT}">
+          <span class="ps-num">5</span>
+          <span class="ps-title">Mapa conceptual</span>
+        </div>
+        <div class="ps-body">${renderMapa(currentUnit)}</div>
+      </section>`;
+
+    const html = `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8">
+<title>${meta.title} — Hematología Clínica UST</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Segoe UI',sans-serif;font-size:12.5px;color:#2c1f28;line-height:1.65;background:#fff}
+  .cover{background:linear-gradient(135deg,${ACCENT},${ACCENT_BG});padding:40px 48px 36px;margin-bottom:0}
+  .cover-badge{display:inline-block;background:rgba(255,255,255,.3);color:#fff;font-size:13px;font-weight:800;padding:4px 14px;border-radius:99px;margin-bottom:12px}
+  .cover h1{font-size:26px;font-weight:800;color:#fff;margin-bottom:6px}
+  .cover p{font-size:13px;color:rgba(255,255,255,.85)}
+  .cover-meta{margin-top:16px;font-size:11px;color:rgba(255,255,255,.65);text-transform:uppercase;letter-spacing:.08em}
+  .ps{padding:36px 48px 32px}
+  .ps-head{display:flex;align-items:center;gap:12px;margin-bottom:18px;padding-left:14px}
+  .ps-num{width:28px;height:28px;border-radius:50%;background:${ACCENT};color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .ps-title{font-size:18px;font-weight:700;color:#2c1f28}
+  .ps-body h3{font-size:15px;font-weight:700;color:${ACCENT};margin:14px 0 8px}
+  .ps-body h4{font-size:13px;font-weight:700;color:${ACCENT};margin:12px 0 6px}
+  .ps-body p{color:#4a3a42;margin-bottom:8px}
+  .ps-body ul,.ps-body ol{padding-left:18px;margin-bottom:10px}
+  .ps-body li{margin-bottom:3px;color:#4a3a42}
+  table{width:100%;border-collapse:collapse;font-size:11.5px;margin:0 0 14px}
+  thead tr{background:${ACCENT}!important}
+  th{padding:7px 10px;text-align:left;color:#fff!important;font-weight:700;background:${ACCENT}!important}
+  td{padding:6px 10px;border:1px solid #e8d4dc;vertical-align:top;color:#2c1f28!important;background:#fff!important}
+  tr:nth-child(even) td{background:#fdf4f6!important}
+  tr[style*="background:#f"] td{background:#fdf4f6!important}
+  tr[style*="background:#e"] td{background:#f4faf6!important}
+  div[style*="background"]{background:#fdf4f6!important;border-radius:6px;padding:12px!important;margin:8px 0}
+  svg{max-width:100%;height:auto}
+  @media print{
+    .cover{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    thead tr{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    .ps{page-break-before:always}
+    .ps:first-child{page-break-before:auto}
+  }
+<\/style><\/head><body>
+<div class="cover">
+  <div class="cover-badge">${meta.label}</div>
+  <h1>${meta.title}</h1>
+  <p>${meta.subtitle}</p>
+  <div class="cover-meta">Hematología Clínica · Universidad Santo Tomás · Tecnología Médica</div>
+</div>
+${sections}
+<script>window.onload=function(){window.print()}<\/script>
+<\/body><\/html>`;
+
+    const w = window.open('', '_blank', 'width=960,height=720');
+    if (!w) { alert('Permite ventanas emergentes para exportar el PDF.'); return; }
+    w.document.write(html);
+    w.document.close();
+  }
+
+  /* ═══════════════════════ TIP ═══════════════════════ */
+  const TIPS = [
+    'VCM bajo + reticulocitos bajos = pensar ferropenia',
+    'PTI: trombocitopenia aislada sin esplenomegalia',
+    'Índice de Mentzer < 13 sugiere talasemia',
+    'EvW: tiempo de sangría prolongado, TTPA variable',
+    'Hemofilia A: déficit factor VIII, TTPA prolongado',
+    'HIT: trombocitopenia + trombosis en paciente heparinizado',
+    'Anemia megaloblástica: VCM alto + neutrófilos hipersegmentados',
+    'LMC: t(9;22) BCR-ABL · primera línea ITKs (imatinib)',
+    'Reed-Sternberg: CD30+ CD15+ CD45− · células "ojos de búho"',
+    'Mieloma: criterios CRAB · plasmocitos clonales ≥10% MO',
+    'SMD con sideroblastos en anillo → mutación SF3B1',
+    'Esquistocitos en frotis = pensar PTT, SHU, CID',
+    'Valor crítico de plaquetas para informe urgente: <20.000/µL',
+    'Folato sin descartar B12 puede agravar la neuropatía'
+  ];
+  document.getElementById('tipText').textContent = TIPS[Math.floor(Math.random() * TIPS.length)];
+
+  /* ═══════════════════════ REF PANEL ═══════════════════════ */
+  function toggleRef() {
+    document.getElementById('refBody').classList.toggle('open');
+    document.getElementById('refChevron').classList.toggle('open');
+  }
+
+  /* ═══════════════════════ ÁRBOL DIAGNÓSTICO ═══════════════════════ */
+  const TREE = {
+    q:'¿Cuál es el VCM del paciente?', hint:'VCM normal: 80–100 fL',
+    opts:[
+      { ico:'⬇️', lbl:'Microcítica', sub:'VCM < 80 fL', bg:'#fdeef3',
+        next:{ q:'¿Cómo están los reticulocitos?', hint:'Normal: 0,5–1,5%',
+          opts:[
+            { ico:'⬇️', lbl:'Bajos < 0,5%', sub:'Producción disminuida', bg:'#fdeef3',
+              next:{ q:'¿Cuál es el nivel de ferritina?', hint:'Normal: H 30–300 / M 15–200 ng/mL',
+                opts:[
+                  { ico:'⬇️', lbl:'Ferritina baja', sub:'< 30 ng/mL (H) / < 15 (M)', bg:'#fdeef3',
+                    res:{ name:'Anemia Ferropénica', ico:'🩸',
+                      sub:'Anemia microcítica hipocrómica por déficit de hierro',
+                      caract:'VCM↓, HCM↓, CHCM↓. Microcitosis e hipocromía en frotis. Historia de pérdidas crónicas, malabsorción o aumento de demanda.',
+                      lab:'Hb↓, VCM < 80 fL, ferritina < 30 ng/mL (H) / < 15 (M), Fe sérico↓, TIBC↑, saturación transferrina < 16%' }},
+                  { ico:'➡️', lbl:'Ferritina normal/alta', sub:'≥ 30 ng/mL', bg:'#e8f3fb',
+                    res:{ name:'Anemia de Enfermedad Crónica', ico:'🏥',
+                      sub:'Anemia normocítica o microcítica en contexto inflamatorio',
+                      caract:'Ferritina elevada (reactante de fase aguda). IL-6 inhibe eritropoyetina y ferroportina. Hierro sérico bajo con TIBC bajo o normal.',
+                      lab:'VCM normal o ↓, ferritina ≥ 30 ng/mL, Fe↓, TIBC↓, PCR↑' }}
+                ]}},
+            { ico:'➡️', lbl:'Variables / Normales', sub:'Con anemia leve y antec. familiar', bg:'#e8f6ed',
+              res:{ name:'Talasemia', ico:'🧬',
+                sub:'Hemoglobinopatía con síntesis defectuosa de cadenas de globina',
+                caract:'Microcitosis desproporcionada a la anemia. Índice de Mentzer < 13. Hb A2 elevada en beta-talasemia. Historia familiar positiva. GR normal o elevado.',
+                lab:'VCM↓↓, GR normal o ↑, Índice Mentzer < 13, electroforesis Hb anormal, ferritina normal' }}
+          ]}},
+      { ico:'➡️', lbl:'Normocítica', sub:'VCM 80–100 fL', bg:'#e8f3fb',
+        next:{ q:'¿Cómo están los reticulocitos?', hint:'Indica capacidad regenerativa de la médula ósea',
+          opts:[
+            { ico:'⬆️', lbl:'Altos > 1,5%', sub:'Médula respondiendo activamente', bg:'#e8f6ed',
+              next:{ q:'¿Test de Coombs directo?', hint:'Detecta anticuerpos sobre la superficie eritrocitaria',
+                opts:[
+                  { ico:'✅', lbl:'Positivo', sub:'Anticuerpos sobre GR', bg:'#fdeef3',
+                    res:{ name:'Anemia Hemolítica Autoinmune', ico:'🛡️',
+                      sub:'Destrucción autoinmune de eritrocitos mediada por anticuerpos IgG/IgM',
+                      caract:'Coombs directo (+). Ictericia, esplenomegalia, orina oscura. Bilirrubina indirecta↑, LDH↑, haptoglobina↓. Esferocitos en frotis.',
+                      lab:'Hb↓, reticulocitos↑, bilirrubina indirecta↑, LDH↑, haptoglobina↓, Coombs directo (+)' }},
+                  { ico:'❌', lbl:'Negativo', sub:'Sin anticuerpos detectables', bg:'#e8f3fb',
+                    res:{ name:'Hemólisis no inmune / Hemorragia aguda', ico:'⚡',
+                      sub:'Hemólisis mecánica, congénita, o pérdida aguda de sangre',
+                      caract:'Coombs (-). Evaluar esquistocitos (microangiopática), esferocitos (esferocitosis hereditaria). Contexto clínico guía diagnóstico.',
+                      lab:'Hb↓, reticulocitos↑, morfología eritrocitaria anormal, Coombs (-), evaluar frotis' }}
+                ]}},
+            { ico:'⬇️', lbl:'Bajos < 0,5%', sub:'Médula no responde', bg:'#fdeef3',
+              res:{ name:'Anemia Aplásica / Enfermedad Crónica', ico:'🦴',
+                sub:'Insuficiencia medular o supresión eritropoyética',
+                caract:'Reticulocitos bajos = fallo medular. Pancitopenia sugiere aplasia. Anemia aislada con ferritina↑ sugiere enfermedad crónica. BOM orientadora.',
+                lab:'Hb↓, reticulocitos < 0,5%, BOM: hipocelular (aplásica) o normocelular con inhibición' }}
+          ]}},
+      { ico:'⬆️', lbl:'Macrocítica', sub:'VCM > 100 fL', bg:'#e8f6ed',
+        next:{ q:'¿Hay neutrófilos hipersegmentados en el frotis?', hint:'≥ 1 neutrófilo con 6+ lóbulos = hipersegmentación patológica',
+          opts:[
+            { ico:'✅', lbl:'Sí, hipersegmentados', sub:'≥ 1 con 6+ lóbulos', bg:'#fdeef3',
+              res:{ name:'Anemia Megaloblástica', ico:'🔬',
+                sub:'Déficit de B12 o ácido fólico con alteración en síntesis de ADN',
+                caract:'VCM > 100 fL, macroovalocitos, neutrófilos hipersegmentados. Pancitopenia en casos severos. B12: además parestesias y ataxia.',
+                lab:'VCM↑↑, B12 < 200 pg/mL y/o folato < 2 ng/mL, LDH↑, bilirrubina indirecta↑ (hematopoyesis ineficaz)' }},
+            { ico:'❌', lbl:'No hipersegmentados', sub:'Morfología neutrofílica normal', bg:'#e8f3fb',
+              res:{ name:'Macrocitosis no megaloblástica', ico:'🍺',
+                sub:'Hepatopatía, hipotiroidismo, alcohol o medicamentos como causa',
+                caract:'Sin hipersegmentación. Causas: hepatopatía crónica, hipotiroidismo, alcoholismo, fármacos (hidroxiurea, metotrexato). Macrocitosis leve a moderada.',
+                lab:'VCM 100–110 fL, pruebas hepáticas alteradas o TSH↑, historia de OH o fármacos' }}
+          ]}}
+    ]
+  };
+
+  let arbolNode = TREE, arbolPath = [];
+
+  function initArbol() {
+    arbolNode = TREE; arbolPath = [];
+    renderArbol();
+  }
+
+  function renderArbol() {
+    const el = document.getElementById('arbolContent');
+    if (arbolNode.res) {
+      const r = arbolNode.res;
+      el.innerHTML = `
+        <div class="arbol-result">
+          <div class="arbol-result-hdr">
+            <div class="arbol-result-ico">${r.ico}</div>
+            <div>
+              <div class="arbol-result-name">${r.name}</div>
+              <div class="arbol-result-sub">${r.sub}</div>
+            </div>
+          </div>
+          <div class="arbol-info-grid">
+            <div class="arbol-info-block">
+              <div class="arbol-info-lbl">Características clave</div>
+              <div class="arbol-info-txt">${r.caract}</div>
+            </div>
+            <div class="arbol-info-block">
+              <div class="arbol-info-lbl">Laboratorio típico</div>
+              <div class="arbol-info-txt">${r.lab}</div>
+            </div>
+          </div>
+          <button class="arbol-reset" onclick="initArbol()">↺ Reiniciar árbol</button>
+        </div>`;
+      return;
+    }
+    const steps = 3, cur = arbolPath.length;
+    let dots = '';
+    for (let i = 0; i < steps; i++) {
+      if (i < cur) dots += '<div class="arbol-dot done"></div>';
+      else if (i === cur) dots += '<div class="arbol-dot current"></div>';
+      else dots += '<div class="arbol-dot"></div>';
+    }
+    const bread = arbolPath.length ? arbolPath.map(p => `<b>${p}</b>`).join(' → ') : 'Inicio';
+    const optsHtml = arbolNode.opts.map((o, i) => `
+      <div class="arbol-option" onclick="arbolChoose(${i})">
+        <div class="arbol-opt-icon" style="background:${o.bg}">${o.ico}</div>
+        <div>
+          <div class="arbol-opt-text">${o.lbl}</div>
+          <div class="arbol-opt-sub">${o.sub}</div>
+        </div>
+      </div>`).join('');
+    el.innerHTML = `
+      <div class="arbol-step">
+        <div class="arbol-breadcrumb">📍 ${bread}</div>
+        <div class="arbol-progress">${dots}</div>
+        <div class="arbol-question">${arbolNode.q}</div>
+        <div class="arbol-hint">💬 ${arbolNode.hint}</div>
+        <div class="arbol-options">${optsHtml}</div>
+        ${arbolPath.length ? '<button class="arbol-back" onclick="initArbol()">↺ Reiniciar</button>' : ''}
+      </div>`;
+  }
+
+  function arbolChoose(idx) {
+    const opt = arbolNode.opts[idx];
+    arbolPath.push(opt.lbl);
+    arbolNode = opt.res ? { res: opt.res } : opt.next;
+    renderArbol();
+  }
+
+  /* ═══════════════════════ COMPARADOR ═══════════════════════ */
+  const PAT = {
+    ferropenica: {
+      nombre:'Anemia Ferropénica',
+      definicion:'Disminución de Hb por déficit de hierro; carencia nutricional más prevalente del mundo.',
+      etiologia:'Pérdidas sanguíneas crónicas (GI, menorragia), malabsorción (celíaca, gastrectomía), mayor demanda (embarazo, crecimiento).',
+      clinica:'Palidez, fatiga, pica (tierra/hielo), coiloniquia (uñas en cuchara), queilitis angular, glositis.',
+      laboratorio:'Hb↓, VCM↓, HCM↓. Ferritina < 30 ng/mL (H). Fe↓, TIBC↑, saturación transferrina < 16%.',
+      morfologia:'Hipocromía, microcitosis, anisocitosis, poiquilocitosis. Células en lápiz/cigarro en casos graves.',
+      tratamiento:'Sulfato ferroso 200 mg/8h VO por 3–6 meses. Hierro IV en malabsorción. Tratar causa subyacente.',
+      dato_clave:'Ferritina < 30 ng/mL confirma déficit. TIBC↑ en ferropenia, ↓ en EEC (diferencia clave).'
+    },
+    megaloblastica: {
+      nombre:'Anemia Megaloblástica',
+      definicion:'Anemia macrocítica por déficit de B12 o folato con alteración de síntesis de ADN y megaloblastos en MO.',
+      etiologia:'B12: veganos, gastritis autoinmune (perniciosa), gastrectomía. Folato: malnutrición, embarazo, antifolatos (MTX, TMP).',
+      clinica:'Palidez, glositis, ictericia leve. B12: parestesias, ataxia, demencia (mielopatía subaguda combinada). Folato: sin neurológico.',
+      laboratorio:'VCM > 100 fL, neutrófilos hipersegmentados. B12 < 200 pg/mL y/o folato < 2 ng/mL. LDH↑, bilirrubina indirecta↑.',
+      morfologia:'Macroovalocitos, hipersegmentación neutrofílica (≥1 con 6+ lóbulos). MO: megaloblastos, bandas gigantes.',
+      tratamiento:'B12: cianocobalamina IM (perniciosa: de por vida). Folato: ácido fólico 5 mg/día VO. Nunca folato sin descartar B12.',
+      dato_clave:'Hipersegmentación de neutrófilos = primer signo y más específico. Dar folato sin B12 puede agravar neuropatía.'
+    },
+    hemolitica: {
+      nombre:'Anemia Hemolítica',
+      definicion:'Destrucción acelerada de eritrocitos que supera la capacidad regenerativa medular. Puede ser intra o extravascular.',
+      etiologia:'Autoinmune (AHAI caliente/frío), congénita (esferocitosis, G6PD, drepanocitosis), mecánica (válvulas, PTT-SHU).',
+      clinica:'Tríada: anemia + ictericia + esplenomegalia. Orina oscura (hemólisis IV), coluria, acolia, colelitiasis bilirrubínica.',
+      laboratorio:'Hb↓, reticulocitos↑ (> 2%), bilirrubina indirecta↑, LDH↑, haptoglobina↓. Coombs (+) en AHAI.',
+      morfologia:'Esferocitos (AHAI, esferocitosis), esquistocitos (microangiopática), células en hoz (drepanocitosis), Heinz (G6PD).',
+      tratamiento:'AHAI caliente: corticoides 1 mg/kg/d, luego rituximab o esplenectomía. G6PD: evitar desencadenantes.',
+      dato_clave:'Coombs directo (+) = autoinmune. Haptoglobina↓ es el marcador más sensible de hemólisis.'
+    },
+    pti: {
+      nombre:'PTI',
+      definicion:'Púrpura Trombocitopénica Inmune: trombocitopenia (< 100.000/µL) inmunomediada sin causa secundaria identificable.',
+      etiologia:'Autoanticuerpos IgG anti-GPIIb/IIIa → destrucción esplénica. Aguda (niños, post-viral) o crónica (adultos, mujeres).',
+      clinica:'Sangrado mucocutáneo: petequias, equimosis, epistaxis, menorragia. SIN esplenomegalia. SIN adenopatías.',
+      laboratorio:'Plaquetas < 100.000/µL. Hemograma restante normal. TP y TTPA normales. Tiempo de sangría prolongado.',
+      morfologia:'Plaquetas grandes (jóvenes, compensatorias). MO: megacariocitos aumentados en número y tamaño.',
+      tratamiento:'> 30.000 sin sangrado: observar. < 30.000 o sintomático: prednisona. Refractario: rituximab, romiplostim, esplenectomía.',
+      dato_clave:'Diagnóstico de exclusión. Trombocitopenia aislada sin esplenomegalia = PTI. IGIV en riesgo de sangrado inminente.'
+    },
+    hit: {
+      nombre:'HIT',
+      definicion:'Trombocitopenia Inducida por Heparina tipo II: trombocitopenia + trombosis por anticuerpos anti-complejo heparina-FP4.',
+      etiologia:'IgG anti-FP4/Heparina activan plaquetas → trombosis paradójica. HNF > HBPM. Aparece días 5–10 de heparina.',
+      clinica:'Caída de plaquetas > 50% entre día 5–10. Trombosis arterial o venosa. Score 4T ≥ 4 = alta probabilidad.',
+      laboratorio:'Plaquetas 20.000–100.000/µL. ELISA anti-FP4(+). Confirmación funcional: SRA o HIPA.',
+      morfologia:'Sin agregados plaquetarios visibles. Plaquetas consumidas en trombos activos.',
+      tratamiento:'SUSPENDER HEPARINA. Anticoagular con argatrobán o fondaparinux. NUNCA transfundir plaquetas. Warfarina solo con plaquetas > 150.000.',
+      dato_clave:'NUNCA plaquetas en HIT (paradoja: aumenta riesgo trombótico). Trombosis + heparina = pensar HIT.'
+    },
+    trombocitosis: {
+      nombre:'Trombocitosis Esencial',
+      definicion:'Neoplasia mieloproliferativa crónica con trombocitosis clonal (plaquetas > 450.000/µL) y megacariocitos anómalos.',
+      etiologia:'Mutación driver: JAK2 V617F (50–60%), CALR exón 9 (25%), MPL (3%), triple-negativo (15%). Clonal y adquirida.',
+      clinica:'Trombosis (arterial > venosa), hemorragia paradójica, eritromelalgia (dolor + rubor distal), cefalea. Esplenomegalia leve.',
+      laboratorio:'Plaquetas > 450.000/µL (a veces > 1.000.000). Leucocitosis leve. Hb normal. JAK2/CALR/MPL mutados.',
+      morfologia:'Plaquetas gigantes y dismórficas. MO: megacariocitos maduros hipersegmentados en cúmulos. Fibrosis mínima.',
+      tratamiento:'Bajo riesgo: AAS 100 mg. Alto riesgo (> 60 años o trombosis previa): hidroxiurea. Refractario: anagrelida o IFN-α.',
+      dato_clave:'Criterios OMS 2022: plaquetas > 450.000 + biopsia característica + mutación driver + excluir causas secundarias.'
+    },
+    hemofiliaa: {
+      nombre:'Hemofilia A',
+      definicion:'Coagulopatía hereditaria ligada al X por déficit cuantitativo o cualitativo del factor VIII de la coagulación.',
+      etiologia:'Mutación gen F8 (Xq28). Recesiva ligada al X: varones afectados, mujeres portadoras (25% sintomáticas).',
+      clinica:'Hemartrosis (rodilla, tobillo, codo → artropatía), hematomas musculares profundos, hemorragia post-cirugía o trauma.',
+      laboratorio:'TTPA prolongado. TP, TT y tiempo de sangría normales. FVIII < 1% (grave), 1–5% (moderada), 5–40% (leve).',
+      morfologia:'No aplica (trastorno de coagulación sin alteración eritrocitaria o plaquetaria).',
+      tratamiento:'Factor VIII recombinante. Emicizumab (profilaxis). DDAVP en forma leve. Inhibidores: FEIBA o NovoSeven (bypass).',
+      dato_clave:'TTPA largo + TP normal + FVIII↓ = Hemofilia A. Indistinguible clínicamente de B sin medir factores.'
+    },
+    hemofiliab: {
+      nombre:'Hemofilia B',
+      definicion:'Coagulopatía hereditaria ligada al X por déficit del factor IX. También llamada Enfermedad de Christmas.',
+      etiologia:'Mutación gen F9 (Xq27.1). Recesiva ligada al X. Menos frecuente que A (ratio 1:5).',
+      clinica:'Clínicamente idéntica a Hemofilia A: hemartrosis, hematomas profundos, hemorragia post-quirúrgica. Severidad según FIX.',
+      laboratorio:'TTPA prolongado. TP, TT y tiempo de sangría normales. FIX↓. FVIII normal (diferencia clave con A).',
+      morfologia:'No aplica (trastorno de coagulación).',
+      tratamiento:'Factor IX recombinante. Fitusiran (siRNA). Etranacogene dezaparvovec (terapia génica aprobada).',
+      dato_clave:'TTPA largo + TP normal + FIX↓ + FVIII normal = Hemofilia B. Solo se diferencia de A midiendo ambos factores.'
+    },
+    vw: {
+      nombre:'Enfermedad de Von Willebrand',
+      definicion:'Trastorno hemorrágico hereditario más frecuente: déficit cuantitativo (tipo 1 y 3) o cualitativo (tipo 2) del FvW.',
+      etiologia:'AD dominante (tipo 1 y 2) o recesiva (tipo 3). FvW une colágeno subendotelial y transporta/protege FVIII.',
+      clinica:'Sangrado mucocutáneo: epistaxis, equimosis fáciles, menorragia, sangrado post-dental. SIN hemartrosis (a diferencia de hemofilias).',
+      laboratorio:'Tiempo de sangría↑. TTPA variable (↑ si FvW↓↓ → FVIII↓). FvW:Ag↓. FvW:RCo (ristocetina)↓. RIPA↓.',
+      morfologia:'No aplica.',
+      tratamiento:'Tipo 1: DDAVP (libera FvW endotelial). Tipo 2B y 3: concentrado FvW (DDAVP contraindicado en 2B). Ácido tranexámico.',
+      dato_clave:'Más frecuente en mujeres (menorragia). DDAVP contraindicado en tipo 2B (empeora trombocitopenia).'
+    }
+  };
+
+  const COMP_ROWS = [
+    {k:'definicion',  l:'Definición'},
+    {k:'etiologia',   l:'Etiología'},
+    {k:'clinica',     l:'Clínica'},
+    {k:'laboratorio', l:'Laboratorio'},
+    {k:'morfologia',  l:'Morfología'},
+    {k:'tratamiento', l:'Tratamiento'},
+    {k:'dato_clave',  l:'Dato clave certamen'}
+  ];
+
+  function renderComparador() {
+    const a = document.getElementById('compA').value;
+    const b = document.getElementById('compB').value;
+    const out = document.getElementById('compResult');
+    if (!a || !b) {
+      out.innerHTML = '<div class="comp-placeholder"><div class="comp-ph-icon">⚖️</div>Selecciona dos patologías para comparar</div>';
+      return;
+    }
+    const pA = PAT[a], pB = PAT[b];
+    const rows = COMP_ROWS.map(r => `<tr><td>${r.l}</td><td>${pA[r.k]}</td><td>${pB[r.k]}</td></tr>`).join('');
+    out.innerHTML = `<table class="comp-table"><thead><tr><th>Campo</th><th>${pA.nombre}</th><th>${pB.nombre}</th></tr></thead><tbody>${rows}</tbody></table>`;
+  }
+
+  /* ═══════════════════════ CALCULADORA ═══════════════════════ */
+  function mkPill(cls, txt) { return `<span class="calc-pill calc-pill-${cls}">${txt}</span>`; }
+
+  function calcular() {
+    const hb    = parseFloat(document.getElementById('cHb').value);
+    const vcm   = parseFloat(document.getElementById('cVcm').value);
+    const gr    = parseFloat(document.getElementById('cGr').value);
+    const retic = parseFloat(document.getElementById('cRetic').value);
+    const fe    = parseFloat(document.getElementById('cFe').value);
+    const tibc  = parseFloat(document.getElementById('cTibc').value);
+    const plaq  = parseFloat(document.getElementById('cPlaq').value);
+
+    const res = [];
+
+    if (!isNaN(vcm) && !isNaN(gr) && gr > 0) {
+      const m = (vcm / gr).toFixed(1);
+      const cls = m < 13 ? 'alterado' : 'limite';
+      res.push({ name:'Índice de Mentzer', formula:`VCM ÷ GR = ${vcm} ÷ ${gr}`, value:m,
+        pill: mkPill(cls, m < 13 ? 'Talasemia probable' : 'Ferropenia probable'),
+        interp: m < 13
+          ? `<strong>${m}</strong>: valor < 13 sugiere <strong>Talasemia</strong>. VCM bajo con GR relativamente conservado. Confirmar con electroforesis de Hb y Hb A2.`
+          : `<strong>${m}</strong>: valor ≥ 13 sugiere <strong>Ferropenia</strong>. VCM y GR ambos disminuidos. Confirmar con ferritina sérica.`
+      });
+    }
+
+    if (!isNaN(retic) && !isNaN(hb)) {
+      const rc = (retic * (hb / 14.5)).toFixed(2);
+      const cls = rc >= 2 ? 'normal' : 'alterado';
+      res.push({ name:'Reticulocitos corregidos', formula:`Retic% × (Hb ÷ 14,5) = ${retic} × (${hb} ÷ 14,5)`, value:`${rc}%`,
+        pill: mkPill(cls, rc >= 2 ? 'Adecuado ≥ 2%' : 'Insuficiente < 2%'),
+        interp: rc >= 2
+          ? `<strong>${rc}%</strong>: respuesta medular <strong>adecuada</strong>. La médula regenera activamente → pensar hemólisis o hemorragia.`
+          : `<strong>${rc}%</strong>: respuesta medular <strong>insuficiente</strong>. Sugiere trastorno arregenerativo (aplasia, déficit nutricional, EEC).`
+      });
+
+      const ir = (rc / 2).toFixed(2);
+      const irCls = ir >= 2 ? 'normal' : 'alterado';
+      res.push({ name:'Índice reticulocitario', formula:`Reticulocitos corregidos ÷ 2 = ${rc} ÷ 2`, value:ir,
+        pill: mkPill(irCls, ir >= 2 ? 'Eritropoyesis efectiva' : 'Eritropoyesis inefectiva'),
+        interp: ir >= 2
+          ? `<strong>${ir}</strong>: eritropoyesis <strong>efectiva</strong>. Respuesta medular compensadora ante la anemia.`
+          : `<strong>${ir}</strong>: eritropoyesis <strong>inefectiva</strong>. La médula no compensa la pérdida o destrucción.`
+      });
+    }
+
+    if (!isNaN(fe) && !isNaN(tibc) && tibc > 0) {
+      const sat = ((fe / tibc) * 100).toFixed(1);
+      let cls, lbl, interp;
+      if (sat < 16)      { cls='alterado'; lbl='Baja — déficit Fe';    interp=`<strong>${sat}%</strong>: saturación < 16% confirma <strong>déficit de hierro</strong>. Ferritina baja completa el diagnóstico de ferropenia.`; }
+      else if (sat <= 50){ cls='normal';   lbl='Normal (16–50%)';      interp=`<strong>${sat}%</strong>: saturación en <strong>rango normal</strong>. Metabolismo del hierro conservado.`; }
+      else               { cls='limite';   lbl='Elevada — evaluar';    interp=`<strong>${sat}%</strong>: saturación > 50% sugiere <strong>sobrecarga de hierro</strong> o hemólisis activa. Evaluar ferritina y contexto.`; }
+      res.push({ name:'Saturación de transferrina', formula:`(Fe sérico ÷ TIBC) × 100 = (${fe} ÷ ${tibc}) × 100`, value:`${sat}%`,
+        pill: mkPill(cls, lbl), interp });
+    }
+
+    if (!isNaN(plaq)) {
+      let cls, lbl, interp;
+      if (plaq < 150000)      { cls='alterado'; lbl='Trombocitopenia'; interp=`<strong>${plaq.toLocaleString()}/µL</strong>: <strong>trombocitopenia</strong> (< 150.000). Evaluar causa: PTI, HIT, aplasia, consumo.`; }
+      else if (plaq <= 450000){ cls='normal';   lbl='Normal';          interp=`<strong>${plaq.toLocaleString()}/µL</strong>: recuento <strong>normal</strong> (150.000–450.000/µL).`; }
+      else                    { cls='limite';   lbl='Trombocitosis';   interp=`<strong>${plaq.toLocaleString()}/µL</strong>: <strong>trombocitosis</strong> (> 450.000). Si > 450.000: descartar reactiva vs. Trombocitosis Esencial (JAK2/CALR).`; }
+      res.push({ name:'Recuento de plaquetas', formula:`Valor ingresado`, value:`${plaq.toLocaleString()}/µL`,
+        pill: mkPill(cls, lbl), interp });
+    }
+
+    if (res.length === 0) {
+      document.getElementById('calcResults').innerHTML = '<div class="calc-empty"><div class="calc-empty-icon">⚠️</div>Ingresa al menos los valores necesarios para calcular un índice</div>';
+      return;
+    }
+
+    document.getElementById('calcResults').innerHTML = res.map(r => `
+      <div class="calc-card">
+        <div class="calc-card-top">
+          <div>
+            <div class="calc-card-name">${r.name}</div>
+            <div class="calc-card-formula">Fórmula: ${r.formula} = <strong>${r.value}</strong></div>
+          </div>
+          ${r.pill}
+        </div>
+        <div class="calc-interp">${r.interp}</div>
+      </div>`).join('');
+  }
+
+  /* ═══════════════════════ QUIZ ═══════════════════════ */
+  const QUIZ_UNITS = {
+    1:   { label:'U1',  name:'Anemias y Trastornos Hemorrágicos' },
+    2:   { label:'U2',  name:'Patología Leucocitaria' },
+    3:   { label:'U3',  name:'Neoplasias Mieloproliferativas' },
+    lab: { label:'LAB', name:'Laboratorio Hematológico' }
+  };
+
+  // Banco de preguntas (50). Cada pregunta: { u, q, opts:[4], correct, fb }
+  const QUIZ_BANK = [
+    // ── U1: Anemias y trastornos hemorrágicos (12) ──
+    { u:1, q:'¿Qué hallazgo de laboratorio confirma déficit de hierro en una anemia microcítica?',
+      opts:['TIBC disminuido','Ferritina < 30 ng/mL','Saturación de transferrina > 50%','Hemoglobina A2 elevada'],
+      correct:1, fb:'Ferritina < 30 ng/mL (hombre) o < 15 (mujer) confirma déficit. En enfermedad crónica está elevada como reactante de fase aguda.' },
+    { u:1, q:'Índice de Mentzer < 13 sugiere principalmente:',
+      opts:['Anemia ferropénica','Enfermedad crónica','Talasemia','Anemia megaloblástica'],
+      correct:2, fb:'Mentzer = VCM ÷ GR. < 13 = talasemia (VCM muy bajo con GR conservado). ≥ 13 = ferropenia.' },
+    { u:1, q:'Hallazgo más específico de anemia megaloblástica en el frotis:',
+      opts:['Macroovalocitos','Hipersegmentación neutrofílica (≥6 lóbulos)','Esquistocitos','Células en diana'],
+      correct:1, fb:'Neutrófilos hipersegmentados (≥1 con ≥6 lóbulos) es el primer signo y el más específico de megaloblastosis.' },
+    { u:1, q:'Tríada clásica de anemia hemolítica:',
+      opts:['Palidez, ictericia y esplenomegalia','Petequias, fiebre y dolor','Disnea, edema y cianosis','Coiloniquia, glositis y pica'],
+      correct:0, fb:'Anemia + ictericia (bilirrubina indirecta) + esplenomegalia. LDH↑ y haptoglobina↓ confirman hemólisis.' },
+    { u:1, q:'En PTI, el hallazgo clave en el hemograma es:',
+      opts:['Pancitopenia','Trombocitopenia aislada','Leucocitosis con desviación izquierda','Anemia con reticulocitos altos'],
+      correct:1, fb:'PTI = plaquetas < 100.000/µL con resto del hemograma normal y sin esplenomegalia. Es diagnóstico de exclusión.' },
+    { u:1, q:'En HIT tipo II, una conducta CONTRAINDICADA es:',
+      opts:['Suspender heparina','Anticoagular con argatrobán','Transfundir plaquetas','Solicitar ELISA anti-FP4'],
+      correct:2, fb:'En HIT NUNCA se transfunden plaquetas (aumenta riesgo trombótico paradójico). Conducta: suspender heparina + anticoagular con argatrobán/fondaparinux.' },
+    { u:1, q:'¿Cuál es la coagulopatía hereditaria MÁS frecuente?',
+      opts:['Hemofilia A','Hemofilia B','Enfermedad de Von Willebrand','Déficit de factor XI'],
+      correct:2, fb:'EvW es el trastorno hemorrágico hereditario más frecuente. Más común en mujeres (menorragia). Tipos 1, 2 (varios subtipos) y 3.' },
+    { u:1, q:'En hemofilia A, el laboratorio característico es:',
+      opts:['TP prolongado, TTPA normal','TTPA prolongado, TP normal, FVIII bajo','Tiempo de sangría prolongado, fibrinógeno bajo','TT prolongado, plaquetas bajas'],
+      correct:1, fb:'Hemofilia A: TTPA largo + TP normal + FVIII bajo. Indistinguible clínicamente de hemofilia B; diferenciar midiendo factores.' },
+    { u:1, q:'En enfermedad de Von Willebrand tipo 2B, está CONTRAINDICADO usar:',
+      opts:['Ácido tranexámico','Concentrado de FvW','DDAVP','Anticonceptivos orales'],
+      correct:2, fb:'DDAVP en tipo 2B agrava la trombocitopenia (libera FvW anómalo que une plaquetas). Usar concentrado de FvW.' },
+    { u:1, q:'Una mujer joven con menorragia, epistaxis fáciles y tiempo de sangría prolongado. ¿Diagnóstico más probable?',
+      opts:['Hemofilia B','Enfermedad de Von Willebrand','PTI crónica','HIT tipo II'],
+      correct:1, fb:'Sangrado mucocutáneo en mujer joven + tiempo de sangría↑ orienta a EvW. FvW:Ag, FvW:RCo y RIPA confirman.' },
+    { u:1, q:'¿Qué anemia se asocia clásicamente con neuropatía y degeneración subaguda combinada de la médula?',
+      opts:['Anemia ferropénica','Déficit de B12','Anemia de enfermedad crónica','Talasemia menor'],
+      correct:1, fb:'Déficit de B12: parestesias, ataxia y mielopatía subaguda combinada. Folato no produce neurológico — por eso NUNCA dar folato sin descartar B12.' },
+    { u:1, q:'En la diferenciación entre ferropenia y enfermedad crónica, el patrón típico de TIBC y ferritina es:',
+      opts:['Ambas elevadas en ferropenia','TIBC↑ + ferritina↓ en ferropenia; TIBC↓ + ferritina↑ en EEC','TIBC↓ + ferritina↓ en ambas','Solo varían según el VCM'],
+      correct:1, fb:'Ferropenia: el cuerpo intenta captar más Fe → TIBC↑, ferritina↓. EEC: hepcidina↑ secuestra Fe → TIBC↓, ferritina↑.' },
+
+    // ── U2: Patología Leucocitaria (14) ──
+    { u:2, q:'Criterio diagnóstico de leucemia aguda según OMS 2022 (LMA):',
+      opts:['≥10% blastos en sangre o médula','≥20% blastos en sangre o médula (o anomalía genética definitoria)','>50% blastos en frotis','Cualquier blasto en sangre periférica'],
+      correct:1, fb:'OMS 2022: ≥20% blastos para LMA (en SP o MO), o anomalía genética definitoria (t(8;21), inv(16), t(15;17), etc.) independiente del % de blastos.' },
+    { u:2, q:'Los bastones de Auer son patognomónicos de:',
+      opts:['Linaje linfoide','Linaje mieloide','Linfocitos atípicos','Megacariocitos'],
+      correct:1, fb:'Bastones de Auer = gránulos azurófilos fusionados → linaje mieloide (LMA). Múltiples (faggot cells) son típicos de LMA-M3 (promielocítica).' },
+    { u:2, q:'LMA-M3 (leucemia promielocítica aguda) se asocia a:',
+      opts:['t(9;22) BCR-ABL','t(15;17) PML-RARA','t(8;14) MYC','t(14;18) BCL2'],
+      correct:1, fb:'LMA-M3: t(15;17) PML-RARA. Tratamiento con ATRA + arsénico (curativo). Riesgo: CID por liberación de gránulos.' },
+    { u:2, q:'Inmunofenotipo característico de LLA-B:',
+      opts:['CD3 + CD7','CD19 + CD10 (TdT+)','CD33 + CD13','CD20 + CD138'],
+      correct:1, fb:'LLA-B precursor: CD19+, CD10+ (CALLA), TdT+, CD22+, CD79a+. LLA-T: CD3+, CD7+, TdT+.' },
+    { u:2, q:'¿Cuál de los siguientes criterios pertenece al CRAB del mieloma múltiple?',
+      opts:['Calcio > 1 mg/dL sobre el normal','Eosinofilia > 5%','PCR > 5 mg/dL','LDH > 1000 U/L'],
+      correct:0, fb:'CRAB: hiperCalcemia (>1 mg/dL sobre VR), insuficiencia Renal (Cr >2), Anemia (Hb <10), lesiones óseas (Bone).' },
+    { u:2, q:'Criterio SLiM-CRAB (mieloma) que NO requiere daño orgánico:',
+      opts:['Plasmocitos clonales en MO ≥60%','Ferritina > 1000','LDH > 500','Beta-2-microglobulina > 5'],
+      correct:0, fb:'SLiM: ≥60% plasmocitos clonales en MO · cadenas libres séricas ratio ≥100 · >1 lesión focal en RM (≥5 mm). Cualquiera = mieloma sintomático.' },
+    { u:2, q:'SMD con sideroblastos en anillo se asocia a mutación en:',
+      opts:['JAK2 V617F','SF3B1','BCR-ABL','FLT3-ITD'],
+      correct:1, fb:'SF3B1 está fuertemente asociado a SMD con sideroblastos en anillo (≥15%, o ≥5% si SF3B1+). Pronóstico relativamente favorable.' },
+    { u:2, q:'En el síndrome mononucleósico por EBV, el frotis muestra:',
+      opts:['Blastos con bastones de Auer','Linfocitos atípicos (de Downey)','Esquistocitos','Linfocitos cerebriformes'],
+      correct:1, fb:'EBV: linfocitos atípicos / activados (células de Downey) >10%. Monotest (heterófilos) (+). EBV-IgM (+) confirma primoinfección.' },
+    { u:2, q:'En sospecha de hantavirus, el hallazgo típico del frotis es:',
+      opts:['Esferocitos abundantes','Inmunoblastos ≥10%','Linfocitos vellosos','Blastos con cMPO+'],
+      correct:1, fb:'Hanta: trombocitopenia + inmunoblastos ≥10% en frotis + hemoconcentración + insuficiencia respiratoria. Notificación obligatoria al ISP.' },
+    { u:2, q:'Edad de presentación pico de la LLA:',
+      opts:['<1 año','2–5 años','30–40 años','>70 años'],
+      correct:1, fb:'LLA es la leucemia más frecuente de la infancia, pico 2–5 años. LMA pico en adultos mayores.' },
+    { u:2, q:'¿Cuál mutación en LMA confiere PEOR pronóstico?',
+      opts:['NPM1','CEBPA bialélica','FLT3-ITD','t(8;21)'],
+      correct:2, fb:'FLT3-ITD: peor pronóstico. NPM1 y CEBPA bialélica: favorables. t(8;21) e inv(16): pronóstico bueno (LMA core-binding factor).' },
+    { u:2, q:'En mieloma múltiple, el componente monoclonal IgM SUGIERE pensar en:',
+      opts:['Mieloma IgM clásico','Macroglobulinemia de Waldenström','Plasmocitoma solitario','Amiloidosis AL pura'],
+      correct:1, fb:'Mieloma IgM es muy raro; ante componente IgM pensar en Macroglobulinemia de Waldenström (linfoma linfoplasmocítico).' },
+    { u:2, q:'SMD con exceso de blastos (EB-2) según OMS 2022:',
+      opts:['5–9% blastos en MO','10–19% blastos en MO','≥20% blastos en MO','<5% blastos en MO'],
+      correct:1, fb:'SMD-EB-1: 5–9% blastos MO o 2–4% SP. SMD-EB-2: 10–19% MO o 5–19% SP. ≥20% ya es LMA.' },
+    { u:2, q:'En LLA precursor B, la traslocación t(9;22) BCR-ABL implica:',
+      opts:['Buen pronóstico','Indicación de imatinib agregado al esquema','No requiere quimioterapia','Indica linaje T'],
+      correct:1, fb:'LLA Ph+ (t(9;22) en ~25% de LLA-B adultos) → agregar inhibidor TK (imatinib, dasatinib) al esquema quimioterapéutico mejora pronóstico.' },
+
+    // ── U3: Neoplasias Mieloproliferativas y Linfoides (12) ──
+    { u:3, q:'Marca genética definitoria de LMC:',
+      opts:['JAK2 V617F','t(9;22) BCR-ABL (cromosoma Filadelfia)','t(15;17) PML-RARA','CALR exón 9'],
+      correct:1, fb:'LMC: t(9;22)(q34;q11) → BCR-ABL1 → tirosina quinasa constitutivamente activa. Diagnóstico por FISH o PCR cuantitativa.' },
+    { u:3, q:'Tratamiento de primera línea en LMC crónica:',
+      opts:['Hidroxiurea','Imatinib (u otro ITK)','Trasplante de MO','Rituximab'],
+      correct:1, fb:'ITKs (imatinib, nilotinib, dasatinib) son primera línea. Trasplante reservado para fracaso. SV 90% a 5 años (SOCHIHEM 2026).' },
+    { u:3, q:'En Policitemia Vera, mutación driver presente en ~95% de casos:',
+      opts:['CALR','MPL','JAK2 V617F','BCR-ABL'],
+      correct:2, fb:'JAK2 V617F en ~95–98% de PV. CALR y MPL son drivers más típicos de TE y MP cuando JAK2 es negativo.' },
+    { u:3, q:'Criterio mayor diagnóstico de Policitemia Vera (OMS 2022):',
+      opts:['Hb >16,5 (H) / >16 (M) o Hcto >49% (H) / >48% (M)','Plaquetas > 450.000','Esplenomegalia palpable','Eritropoyetina elevada'],
+      correct:0, fb:'OMS 2022 PV: criterio mayor 1 = Hb/Hcto elevados. Criterios: panmielosis en BMO + JAK2+ + EPO sérica baja.' },
+    { u:3, q:'En la LLC, el hallazgo morfológico clásico es:',
+      opts:['Células peludas','Sombras de Gumprecht (smudge cells)','Bastones de Auer','Cuerpos de Reed-Sternberg'],
+      correct:1, fb:'Sombras de Gumprecht: linfocitos rotos por la fragilidad celular. Frecuentes en LLC. Score Matutes ≥4/5 confirma fenotipo B clonal.' },
+    { u:3, q:'Tricoleucemia (HCL): el inmunofenotipo característico incluye:',
+      opts:['CD5+, CD23+','CD11c+, CD25+, CD103+','CD30+, CD15+','CD3+, CD7+'],
+      correct:1, fb:'HCL: CD11c+, CD25+, CD103+, CD123+, anexina A1+. Mutación BRAF V600E. Tratamiento: cladribina (curativa en ~80%).' },
+    { u:3, q:'Linfoma folicular: traslocación característica:',
+      opts:['t(11;14) ciclina D1','t(14;18) BCL2','t(8;14) MYC','t(11;18) API2-MALT1'],
+      correct:1, fb:'Linfoma folicular: t(14;18) → sobreexpresión BCL2 (antiapoptótico). Linfoma del manto: t(11;14) ciclina D1.' },
+    { u:3, q:'Linfoma de Hodgkin: célula diagnóstica:',
+      opts:['Linfocito atípico de Downey','Célula de Reed-Sternberg (CD30+, CD15+, CD45−)','Célula peluda','Plasmocito flameante'],
+      correct:1, fb:'Reed-Sternberg: célula binucleada en "ojos de búho". Fenotipo CD30+, CD15+, CD45−, PAX5 débil. Variante clásica del Hodgkin.' },
+    { u:3, q:'Esquema de primera línea para Linfoma de Hodgkin clásico:',
+      opts:['CHOP','ABVD','FLAG-IDA','BEACOPP en estadios bajos'],
+      correct:1, fb:'Hodgkin clásico: ABVD (adriamicina-bleomicina-vinblastina-dacarbazina). BEACOPP reservado a estadios avanzados o mal pronóstico.' },
+    { u:3, q:'En LLC, ¿qué score se usa para confirmar inmunofenotipo?',
+      opts:['Sokal','EUTOS','Matutes (≥4/5)','IPS Hasenclever'],
+      correct:2, fb:'Score Matutes (5 marcadores: CD5, CD23, FMC7, CD22/CD79b, sIg). ≥4/5 = LLC. ≤2 = no LLC (orienta a otros SLP).' },
+    { u:3, q:'Trombocitosis Esencial: mutación más frecuente:',
+      opts:['JAK2 V617F (~50–60%)','CALR exón 9 (~25%)','MPL (~3%)','BCR-ABL'],
+      correct:0, fb:'TE drivers: JAK2 V617F 50–60% > CALR 25% > MPL 3% > triple-negativos 15%. Plaquetas > 450.000 + biopsia característica + driver.' },
+    { u:3, q:'Sézary: hallazgo morfológico característico:',
+      opts:['Linfocitos cerebriformes en sangre periférica','Esferocitos','Bastones de Auer','Células peludas'],
+      correct:0, fb:'Sd. de Sézary: linfoma T cutáneo leucémico. Células de Sézary cerebriformes circulantes ≥1000/µL. CD4+ CD7−.' },
+
+    // ── LAB: Laboratorio Hematológico (12) ──
+    { u:'lab', q:'Valor de referencia de reticulocitos en adulto:',
+      opts:['0,1–0,4 %','0,5–2,5 %','2,5–5 %','5–10 %'],
+      correct:1, fb:'Reticulocitos adulto: 0,5–2,5% (Díaz 2022). En anemias regenerativas (hemólisis, hemorragia) suben sobre 2%.' },
+    { u:'lab', q:'Sistema ISP para valoración semicuantitativa en frotis: "+++" equivale a:',
+      opts:['1–2 elementos por campo','3–5 por campo','6–10 por campo','≥11 por campo'],
+      correct:3, fb:'ISP: + = 5/campo, ++ = 6–10/campo, +++ = ≥11/campo. Aplica para hipocromía, anisocitosis, poiquilocitosis.' },
+    { u:'lab', q:'Corrección de leucocitos por eritroblastos (NRBC) cuando hay ≥5 NRBC/100 leucocitos:',
+      opts:['Leucos corregidos = leucos × 100 / (100 + NRBC)','Leucos corregidos = leucos / NRBC','Leucos corregidos = leucos × NRBC','No requiere corrección'],
+      correct:0, fb:'Cuando NRBC ≥5/100 leucos: corrección = (leucos × 100) / (100 + NRBC). Sin corrección, los contadores sobreestiman.' },
+    { u:'lab', q:'Anemia severa según OMS (en mujeres no embarazadas):',
+      opts:['Hb < 12 g/dL','Hb < 10 g/dL','Hb < 8 g/dL','Hb < 7 g/dL'],
+      correct:3, fb:'OMS: leve (11–11,9), moderada (8–10,9), severa (<8). Confirmar criterio local — Díaz 2022 usa <7 g/dL como severa.' },
+    { u:'lab', q:'VCM normal adulto:',
+      opts:['60–80 fL','80–100 fL','100–120 fL','120–140 fL'],
+      correct:1, fb:'VCM 80–100 fL. <80 = microcítico. >100 = macrocítico. ADE (RDW) >14,5% sugiere anisocitosis (útil para diferenciar ferropenia vs talasemia).' },
+    { u:'lab', q:'Hemoglobina mínima en mujer embarazada (3er trimestre):',
+      opts:['11 g/dL','10,5 g/dL','12 g/dL','9 g/dL'],
+      correct:1, fb:'Embarazo: 1er trim Hb ≥11 · 2do ≥10,5 · 3er ≥10,5. Hemodilución fisiológica (volumen plasmático↑ > masa eritrocitaria↑).' },
+    { u:'lab', q:'Tecnología usada en analizadores Sysmex:',
+      opts:['Impedancia eléctrica (Coulter)','Light scattering por láser + citoquímica','Manual con cámara de Neubauer','Centrifugación diferencial'],
+      correct:1, fb:'Sysmex: light scattering + fluorescencia + citoquímica → 5 poblaciones leucocitarias. Coulter usa impedancia (cambios de voltaje).' },
+    { u:'lab', q:'La granulación tóxica en neutrófilos es característica de:',
+      opts:['Infección bacteriana severa','Anemia ferropénica','Alergia','Hemólisis crónica'],
+      correct:0, fb:'Granulación tóxica + vacuolización + cuerpos de Döhle = respuesta a infección bacteriana o inflamación severa.' },
+    { u:'lab', q:'Recuento normal de plaquetas:',
+      opts:['50.000–150.000/µL','150.000–450.000/µL','100.000–250.000/µL','400.000–800.000/µL'],
+      correct:1, fb:'Plaquetas: 150.000–450.000/µL. <150.000 = trombocitopenia. >450.000 = trombocitosis (reactiva vs clonal).' },
+    { u:'lab', q:'Valor crítico de plaquetas que requiere informe URGENTE:',
+      opts:['<100.000/µL','<50.000/µL','<20.000/µL','<150.000/µL'],
+      correct:2, fb:'Valor crítico de plaquetas: <20.000/µL (riesgo de sangrado espontáneo). Otros críticos: Hb <7, leucos <2.000 o >30.000.' },
+    { u:'lab', q:'Reticulocitos corregidos: fórmula',
+      opts:['Retic × (Hb paciente ÷ Hb ideal 14,5)','Retic × 2','Retic ÷ 2','Retic × VCM ÷ 100'],
+      correct:0, fb:'Reticulocitos corregidos = Retic% × (Hb paciente / Hb ideal 14,5). Si <2% → respuesta medular insuficiente.' },
+    { u:'lab', q:'En el frotis, esquistocitos sugieren:',
+      opts:['Anemia ferropénica','Hemólisis microangiopática (PTT, SHU, CID)','Anemia megaloblástica','Mononucleosis infecciosa'],
+      correct:1, fb:'Esquistocitos: GR fragmentados por daño mecánico (fibrina intravascular). Marcadores de PTT, SHU, CID, válvulas mecánicas.' }
+  ];
+
+  const QUIZ_COUNT_BY_UNIT = { 1:0, 2:0, 3:0, lab:0 };
+  QUIZ_BANK.forEach(q => { QUIZ_COUNT_BY_UNIT[q.u]++; });
+
+  function quizBest(uid) { return parseInt(localStorage.getItem('hc-quiz-best-'+uid) || '0', 10); }
+  function quizSetBest(uid, pct) {
+    const prev = quizBest(uid);
+    if (pct > prev) localStorage.setItem('hc-quiz-best-'+uid, String(pct));
+  }
+  function quizCount() { return parseInt(localStorage.getItem('hc-quiz-count') || '0', 10); }
+  function quizIncCount() { localStorage.setItem('hc-quiz-count', String(quizCount() + 1)); }
+
+  let quizState = null;
+
+  function shuffle(arr) {
+    const a = [...arr];
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  function quizRender() {
+    const root = document.getElementById('quizContent');
+    if (!quizState) { renderQuizIntro(root); return; }
+    if (quizState.finished) { renderQuizResults(root); return; }
+    renderQuizQuestion(root);
+  }
+
+  function renderQuizIntro(root) {
+    const total = QUIZ_BANK.length;
+    const cards = ['all','1','2','3','lab'].map(uid => {
+      const isAll = uid === 'all';
+      const meta = isAll
+        ? { label:'TODO', name:'Todas las unidades' }
+        : QUIZ_UNITS[uid] || QUIZ_UNITS[parseInt(uid,10)];
+      const count = isAll ? total : (QUIZ_COUNT_BY_UNIT[isAll ? null : (uid==='lab'?'lab':parseInt(uid,10))] || 0);
+      const best = quizBest(uid);
+      return `<div class="quiz-unit-card" data-uid="${uid}" onclick="startQuiz('${uid}')">
+        <div class="quiz-unit-badge">${meta.label}</div>
+        <div class="quiz-unit-name">${meta.name}</div>
+        <div class="quiz-unit-meta">
+          <span>📝 ${count} preguntas</span>
+          ${best > 0 ? `<span class="quiz-unit-best">★ Mejor: ${best}%</span>` : '<span>★ Sin intentos</span>'}
+        </div>
+      </div>`;
+    }).join('');
+    root.innerHTML = `
+      <div class="quiz-intro">
+        <div class="quiz-intro-title">Pon a prueba lo que sabes</div>
+        <div class="quiz-intro-desc">${total} preguntas con alternativas múltiples basadas en el contenido de las 4 unidades. Recibes feedback inmediato después de cada respuesta y un resumen al final. Tu mejor puntaje queda guardado por unidad.</div>
+        <div class="quiz-units-grid">${cards}</div>
+      </div>`;
+  }
+
+  function startQuiz(uidRaw) {
+    let pool;
+    if (uidRaw === 'all') pool = [...QUIZ_BANK];
+    else {
+      const uid = uidRaw === 'lab' ? 'lab' : parseInt(uidRaw, 10);
+      pool = QUIZ_BANK.filter(q => q.u === uid);
+    }
+    const N = Math.min(pool.length, uidRaw === 'all' ? 20 : pool.length);
+    const questions = shuffle(pool).slice(0, N).map(q => {
+      const idx = q.opts.map((_,i) => i);
+      const order = shuffle(idx);
+      return {
+        q: q.q,
+        opts: order.map(i => q.opts[i]),
+        correct: order.indexOf(q.correct),
+        fb: q.fb,
+        original: q
+      };
+    });
+    quizState = {
+      uid: uidRaw, total: questions.length, current: 0,
+      questions, answers: [], score: 0, finished: false, answered: false
+    };
+    quizRender();
+  }
+
+  function renderQuizQuestion(root) {
+    const s = quizState;
+    const cur = s.questions[s.current];
+    const pct = ((s.current) / s.total) * 100;
+    const unitLabel = s.uid === 'all' ? 'TODAS' : (QUIZ_UNITS[s.uid] || QUIZ_UNITS[parseInt(s.uid,10)]).label;
+    const letters = ['A','B','C','D','E'];
+    const opts = cur.opts.map((o, i) => {
+      let cls = 'quiz-option';
+      if (s.answered) {
+        cls += ' disabled';
+        if (i === cur.correct) cls += ' correct';
+        else if (i === s.lastChoice) cls += ' wrong';
+      }
+      return `<div class="${cls}" onclick="quizChoose(${i})">
+        <div class="quiz-option-letter">${letters[i]}</div>
+        <div class="quiz-option-text">${o}</div>
+      </div>`;
+    }).join('');
+
+    let feedback = '';
+    if (s.answered) {
+      const ok = s.lastChoice === cur.correct;
+      feedback = `<div class="quiz-feedback ${ok?'ok':'bad'}">
+        <span class="quiz-feedback-label">${ok ? '✓ Correcto' : '✗ Incorrecto'}</span>
+        ${cur.fb}
+      </div>`;
+    }
+
+    const nextLabel = s.current === s.total - 1 ? 'Ver resultados →' : 'Siguiente pregunta →';
+    const actions = s.answered
+      ? `<button class="quiz-btn-primary" onclick="quizNext()">${nextLabel}</button>`
+      : `<button class="quiz-btn-secondary" onclick="quizExit()">Salir</button>`;
+
+    root.innerHTML = `
+      <div class="quiz-runner">
+        <div class="quiz-runner-head">
+          <div class="quiz-runner-meta">
+            <span class="quiz-runner-pill">${unitLabel}</span>
+            <span class="quiz-runner-counter">Pregunta ${s.current + 1} de ${s.total}</span>
+            <span class="quiz-runner-score">★ ${s.score} aciertos</span>
+          </div>
+          <button class="quiz-runner-exit" onclick="quizExit()">Salir</button>
+        </div>
+        <div class="quiz-progress"><div class="quiz-progress-bar" style="width:${pct}%"></div></div>
+        <div class="quiz-question">${cur.q}</div>
+        <div class="quiz-hint">💬 Elige la alternativa correcta — atajos: <b>1–4</b> para responder · <b>Enter</b> para avanzar.</div>
+        <div class="quiz-options">${opts}</div>
+        ${feedback}
+        <div class="quiz-actions">${actions}</div>
+      </div>`;
+  }
+
+  function quizChoose(i) {
+    if (!quizState || quizState.answered) return;
+    const cur = quizState.questions[quizState.current];
+    quizState.answered = true;
+    quizState.lastChoice = i;
+    const ok = i === cur.correct;
+    if (ok) quizState.score++;
+    quizState.answers.push({ q: cur.q, choice: cur.opts[i], correct: cur.opts[cur.correct], ok, fb: cur.fb });
+    quizRender();
+  }
+
+  function quizNext() {
+    if (!quizState) return;
+    if (quizState.current === quizState.total - 1) {
+      quizState.finished = true;
+      const pct = Math.round((quizState.score / quizState.total) * 100);
+      quizSetBest(quizState.uid, pct);
+      quizIncCount();
+      updateDashboardStats();
+    } else {
+      quizState.current++;
+      quizState.answered = false;
+      quizState.lastChoice = null;
+    }
+    quizRender();
+  }
+
+  function quizExit() {
+    if (quizState && !quizState.finished && quizState.current > 0) {
+      if (!confirm('¿Salir del quiz? Se perderá el progreso de este intento.')) return;
+    }
+    quizState = null;
+    quizRender();
+  }
+
+  function renderQuizResults(root) {
+    const s = quizState;
+    const pct = Math.round((s.score / s.total) * 100);
+    let msg, color, title;
+    if (pct >= 90)      { title='¡Excelente!';   msg='Dominas el material de esta unidad. Sigue así.'; color='#2e7d32'; }
+    else if (pct >= 75) { title='Muy bien';      msg='Buen nivel. Revisa los errores y refuerza los puntos débiles.'; color='#3a8a5c'; }
+    else if (pct >= 60) { title='Aprobado';      msg='Cumples el mínimo, pero hay espacio para mejorar. Revisa los conceptos errados.'; color='#b8860b'; }
+    else                { title='A reforzar';    msg='Aún hay vacíos importantes. Revisa el contenido de la unidad y vuelve a intentarlo.'; color='#c0392b'; }
+
+    const radius = 70, circ = 2 * Math.PI * radius;
+    const dash = (pct / 100) * circ;
+    const ring = `
+      <svg viewBox="0 0 160 160" width="160" height="160">
+        <circle cx="80" cy="80" r="${radius}" fill="none" stroke="var(--border)" stroke-width="14"/>
+        <circle cx="80" cy="80" r="${radius}" fill="none" stroke="${color}" stroke-width="14"
+          stroke-dasharray="${dash} ${circ}" stroke-linecap="round"
+          transform="rotate(-90 80 80)" style="transition:stroke-dasharray .8s ease"/>
+      </svg>`;
+
+    const review = s.answers.map(a => `
+      <div class="quiz-review-item ${a.ok?'ok':'bad'}">
+        <div class="quiz-review-ico">${a.ok ? '✅' : '❌'}</div>
+        <div>
+          <div class="quiz-review-q">${a.q}</div>
+          <div class="quiz-review-a">${a.ok ? `Tu respuesta: ${a.choice}` : `Tu respuesta: ${a.choice} · Correcta: <b>${a.correct}</b>`}</div>
+        </div>
+      </div>`).join('');
+
+    root.innerHTML = `
+      <div class="quiz-result-card">
+        <div class="quiz-result-ring">
+          ${ring}
+          <div class="quiz-result-pct">
+            <div class="quiz-result-pct-num" style="color:${color}">${pct}%</div>
+            <div class="quiz-result-pct-sub">Puntaje</div>
+          </div>
+        </div>
+        <div class="quiz-result-title">${title}</div>
+        <div class="quiz-result-msg">${msg}</div>
+        <div class="quiz-result-stats">
+          <div><div class="quiz-result-stat-num">${s.score}</div><div class="quiz-result-stat-lbl">Aciertos</div></div>
+          <div><div class="quiz-result-stat-num">${s.total - s.score}</div><div class="quiz-result-stat-lbl">Errores</div></div>
+          <div><div class="quiz-result-stat-num">${s.total}</div><div class="quiz-result-stat-lbl">Total</div></div>
+        </div>
+        <div class="quiz-result-actions">
+          <button class="quiz-btn-primary" onclick="startQuiz('${s.uid}')">↻ Intentar de nuevo</button>
+          <button class="quiz-btn-secondary" onclick="quizExit()">← Volver al menú</button>
+        </div>
+        <div class="quiz-review-list">
+          <div style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-secondary);margin-bottom:12px">Repaso de respuestas</div>
+          ${review}
+        </div>
+      </div>`;
+  }
+
+  /* ═══════════════════════ FLASHCARDS ═══════════════════════ */
+  // Cada card: { u, q (front), a (back) }
+  const FC_BANK = [
+    // U1
+    { u:1, q:'Tríada laboratorial de anemia ferropénica',                   a:'Hb↓ · Ferritina < 30 ng/mL · Saturación de transferrina < 16% (con TIBC↑).' },
+    { u:1, q:'Índice de Mentzer < 13',                                      a:'Sugiere talasemia (VCM↓ con GR conservado).' },
+    { u:1, q:'Primer hallazgo en frotis en megaloblástica',                 a:'Neutrófilos hipersegmentados (≥6 lóbulos) — más específico que macroovalocitos.' },
+    { u:1, q:'¿Por qué nunca dar folato sin descartar B12?',                a:'Puede agravar el daño neurológico de la deficiencia de B12 (mielopatía subaguda combinada).' },
+    { u:1, q:'Anemia hemolítica: marcadores',                               a:'Reticulocitos↑ · LDH↑ · bilirrubina indirecta↑ · haptoglobina↓. Coombs (+) si autoinmune.' },
+    { u:1, q:'PTI: diagnóstico',                                            a:'Trombocitopenia aislada (<100.000), sin esplenomegalia, sin causa secundaria. Diagnóstico de exclusión.' },
+    { u:1, q:'HIT tipo II: conducta clave',                                 a:'SUSPENDER heparina · anticoagular con argatrobán o fondaparinux · NUNCA transfundir plaquetas.' },
+    { u:1, q:'Hemofilia A vs B',                                            a:'A: déficit FVIII (más frecuente). B: déficit FIX (Christmas). Clínica idéntica; diferenciar midiendo factores.' },
+    { u:1, q:'Trastorno hemorrágico hereditario más frecuente',             a:'Enfermedad de Von Willebrand. Sangrado mucocutáneo, más sintomático en mujeres (menorragia).' },
+    { u:1, q:'EvW tipo 2B: tratamiento contraindicado',                     a:'DDAVP — empeora la trombocitopenia. Usar concentrado de FvW.' },
+    { u:1, q:'Diferencia ferritina y TIBC entre ferropenia y EEC',          a:'Ferropenia: ferritina↓ + TIBC↑. EEC: ferritina↑ + TIBC↓ (hepcidina secuestra Fe).' },
+    { u:1, q:'Esquistocitos en frotis sugieren',                            a:'Hemólisis microangiopática: PTT, SHU, CID, válvulas mecánicas.' },
+
+    // U2
+    { u:2, q:'Criterio OMS 2022 para LMA',                                  a:'≥20% blastos en SP o MO · o anomalía genética definitoria (t(8;21), inv(16), t(15;17)…) sin importar % de blastos.' },
+    { u:2, q:'Bastones de Auer: significado',                               a:'Linaje mieloide. Múltiples ("faggot cells") típicos de LMA-M3 (promielocítica).' },
+    { u:2, q:'LMA-M3: traslocación y tratamiento',                          a:'t(15;17) PML-RARA. ATRA + arsénico — curativo. Riesgo CID al inicio.' },
+    { u:2, q:'Inmunofenotipo LLA-B vs LLA-T',                               a:'B: CD19+, CD10+ (CALLA), TdT+. T: CD3+, CD7+, TdT+.' },
+    { u:2, q:'Criterios CRAB del mieloma sintomático',                      a:'hiperCalcemia · insuficiencia Renal · Anemia · lesiones óseas (Bone).' },
+    { u:2, q:'Criterios SLiM (mieloma sin daño orgánico)',                  a:'≥60% plasmocitos clonales en MO · ratio cadenas libres ≥100 · >1 lesión focal RM ≥5 mm.' },
+    { u:2, q:'SMD con sideroblastos en anillo: mutación',                   a:'SF3B1. Sideroblastos ≥15% (o ≥5% si SF3B1+). Pronóstico relativamente favorable.' },
+    { u:2, q:'EBV (mononucleosis): hallazgo frotis',                        a:'Linfocitos atípicos (células de Downey) > 10%. Monotest (+). EBV-IgM (+).' },
+    { u:2, q:'Hantavirus: hallazgo frotis',                                 a:'Inmunoblastos ≥ 10% · trombocitopenia · hemoconcentración. Notificación ISP obligatoria.' },
+    { u:2, q:'LLA: edad de presentación más frecuente',                     a:'2–5 años. Es la leucemia más común de la infancia.' },
+    { u:2, q:'FLT3-ITD en LMA',                                             a:'Peor pronóstico. Indicación de inhibidores de FLT3 (midostaurina, gilteritinib).' },
+    { u:2, q:'SMD-EB-1 vs EB-2 (OMS 2022)',                                 a:'EB-1: 5–9% blastos MO. EB-2: 10–19% MO. ≥20% = LMA.' },
+    { u:2, q:'LLA Ph+ (t(9;22)): conducta',                                 a:'Agregar inhibidor de tirosina-kinasa (imatinib, dasatinib) al esquema. Mejora pronóstico.' },
+
+    // U3
+    { u:3, q:'LMC: marca genética',                                         a:'t(9;22)(q34;q11) → BCR-ABL1. Tratamiento de primera línea: ITKs (imatinib). SV 90% a 5 años.' },
+    { u:3, q:'Mutación driver más frecuente en Policitemia Vera',           a:'JAK2 V617F (~95–98%). EPO sérica baja apoya el diagnóstico.' },
+    { u:3, q:'OMS 2022 PV: criterio mayor 1',                               a:'Hb >16,5 (H) / >16 (M) o Hcto >49% (H) / >48% (M). Más BMO con panmielosis y JAK2+.' },
+    { u:3, q:'LLC: hallazgo morfológico clásico',                           a:'Sombras de Gumprecht (smudge cells). Score Matutes ≥4/5 confirma fenotipo B clonal.' },
+    { u:3, q:'Tricoleucemia (HCL): inmunofenotipo y mutación',              a:'CD11c+, CD25+, CD103+, CD123+, anexina A1+. BRAF V600E. Cladribina curativa.' },
+    { u:3, q:'Linfoma folicular: traslocación',                             a:'t(14;18) → BCL2 (antiapoptótico).' },
+    { u:3, q:'Linfoma del manto: traslocación',                             a:'t(11;14) → ciclina D1.' },
+    { u:3, q:'Linfoma de Hodgkin: célula diagnóstica e inmunofenotipo',     a:'Célula de Reed-Sternberg (binucleada "ojos de búho"). CD30+, CD15+, CD45−, PAX5 débil.' },
+    { u:3, q:'Hodgkin clásico: primera línea',                              a:'ABVD (adriamicina-bleomicina-vinblastina-dacarbazina).' },
+    { u:3, q:'Trombocitosis Esencial: drivers',                             a:'JAK2 V617F 50–60% > CALR exón 9 25% > MPL 3% > triple-negativo 15%.' },
+    { u:3, q:'Sd. de Sézary',                                               a:'Linfoma T cutáneo leucémico. Células cerebriformes ≥ 1.000/µL. CD4+ CD7−.' },
+    { u:3, q:'Score Matutes',                                               a:'5 marcadores: CD5, CD23, FMC7, CD22/CD79b débil, sIg débil. ≥4 = LLC.' },
+
+    // LAB
+    { u:'lab', q:'VR reticulocitos adulto',                                 a:'0,5 – 2,5%. >2% = respuesta regenerativa (hemólisis, hemorragia).' },
+    { u:'lab', q:'ISP: equivalencia +/++/+++',                              a:'+ = 5/campo · ++ = 6–10/campo · +++ = ≥11/campo.' },
+    { u:'lab', q:'Corrección leucocitos por NRBC',                          a:'Si NRBC ≥5/100 leucos: leucos corregidos = (leucos × 100) / (100 + NRBC).' },
+    { u:'lab', q:'OMS — clasificación de anemia por Hb',                    a:'Leve: 11–11,9 · Moderada: 8–10,9 · Severa: <8 g/dL.' },
+    { u:'lab', q:'VCM normal adulto',                                       a:'80–100 fL. <80 microcítico · >100 macrocítico.' },
+    { u:'lab', q:'Hb mínima 3er trimestre embarazo',                        a:'≥10,5 g/dL. Hemodilución fisiológica.' },
+    { u:'lab', q:'Sysmex vs Coulter',                                       a:'Sysmex: light scattering + fluorescencia + citoquímica → 5 poblaciones. Coulter: impedancia eléctrica.' },
+    { u:'lab', q:'Granulación tóxica en neutrófilos',                       a:'Infección bacteriana severa. Suele acompañarse de cuerpos de Döhle y vacuolización.' },
+    { u:'lab', q:'Plaquetas: VR',                                           a:'150.000 – 450.000/µL.' },
+    { u:'lab', q:'Valor crítico de plaquetas (informe urgente)',            a:'<20.000/µL (riesgo de sangrado espontáneo).' },
+    { u:'lab', q:'Reticulocitos corregidos: fórmula',                       a:'Retic% × (Hb paciente / 14,5). <2% = respuesta insuficiente.' },
+    { u:'lab', q:'Esquistocitos: causas',                                   a:'Hemólisis microangiopática: PTT, SHU, CID, válvulas mecánicas.' }
+  ];
+
+  const FC_COUNT_BY_UNIT = { 1:0, 2:0, 3:0, lab:0 };
+  FC_BANK.forEach(c => { FC_COUNT_BY_UNIT[c.u]++; });
+  FC_BANK.forEach((c, i) => { c._id = 'fc-' + c.u + '-' + i; });
+
+  function fcKnown() {
+    try { return JSON.parse(localStorage.getItem('hc-fc-known') || '[]'); } catch { return []; }
+  }
+  function fcSetKnown(arr) { localStorage.setItem('hc-fc-known', JSON.stringify(arr)); }
+  function fcMarkKnown(id, known) {
+    const list = fcKnown();
+    const idx = list.indexOf(id);
+    if (known && idx === -1) list.push(id);
+    if (!known && idx !== -1) list.splice(idx, 1);
+    fcSetKnown(list);
+  }
+
+  let fcState = null;
+
+  function fcRender() {
+    const root = document.getElementById('fcContent');
+    if (!fcState) { renderFcIntro(root); return; }
+    renderFcCard(root);
+  }
+
+  function renderFcIntro(root) {
+    const total = FC_BANK.length;
+    const knownAll = fcKnown().length;
+    const cards = ['all','1','2','3','lab'].map(uid => {
+      const isAll = uid === 'all';
+      const meta = isAll
+        ? { label:'TODO', name:'Todas las unidades' }
+        : QUIZ_UNITS[uid] || QUIZ_UNITS[parseInt(uid,10)];
+      const pool = isAll ? FC_BANK : FC_BANK.filter(c => c.u === (uid==='lab'?'lab':parseInt(uid,10)));
+      const count = pool.length;
+      const known = pool.filter(c => fcKnown().includes(c._id)).length;
+      return `<div class="quiz-unit-card" data-uid="${uid}" onclick="startFc('${uid}')">
+        <div class="quiz-unit-badge">${meta.label}</div>
+        <div class="quiz-unit-name">${meta.name}</div>
+        <div class="quiz-unit-meta">
+          <span>🃏 ${count} tarjetas</span>
+          <span class="quiz-unit-best">✓ ${known}/${count} dominadas</span>
+        </div>
+      </div>`;
+    }).join('');
+    root.innerHTML = `
+      <div class="fc-intro">
+        <div class="quiz-intro-title">Repaso rápido con flashcards</div>
+        <div class="quiz-intro-desc">${total} tarjetas con concepto al frente y respuesta al reverso. Marca lo que ya dominas y enfócate en lo que falta. Tu progreso se guarda automáticamente. Atajos: <b>Espacio/Enter</b> para voltear, <b>←</b> anterior, <b>→</b> siguiente.</div>
+        <div class="quiz-units-grid">${cards}</div>
+      </div>`;
+  }
+
+  function startFc(uidRaw) {
+    let pool;
+    if (uidRaw === 'all') pool = [...FC_BANK];
+    else {
+      const uid = uidRaw === 'lab' ? 'lab' : parseInt(uidRaw, 10);
+      pool = FC_BANK.filter(c => c.u === uid);
+    }
+    fcState = { uid: uidRaw, cards: shuffle(pool), idx: 0, flipped: false };
+    fcRender();
+  }
+
+  function renderFcCard(root) {
+    const s = fcState;
+    const c = s.cards[s.idx];
+    const unitLabel = s.uid === 'all' ? 'TODAS' : (QUIZ_UNITS[s.uid] || QUIZ_UNITS[parseInt(s.uid,10)]).label;
+    const knownNow = fcKnown().includes(c._id);
+    root.innerHTML = `
+      <div class="fc-stage">
+        <div class="fc-meta-bar">
+          <span class="fc-deck-pill">${unitLabel}</span>
+          <span class="fc-counter">${s.idx + 1} de ${s.cards.length} · ✓ ${fcKnown().filter(id => s.cards.some(cc => cc._id === id)).length} dominadas</span>
+          <button class="quiz-runner-exit" onclick="fcExit()">Salir</button>
+        </div>
+        <div class="fc-card-wrap">
+          <div class="fc-card ${s.flipped?'flipped':''}" onclick="fcFlip()">
+            <div class="fc-face front">
+              <span class="fc-face-label">Concepto</span>
+              <div class="fc-face-content">${c.q}</div>
+              <span class="fc-tag">${unitLabel} · Toca para ver respuesta</span>
+            </div>
+            <div class="fc-face back">
+              <span class="fc-face-label">Respuesta</span>
+              <div class="fc-face-content">${c.a}</div>
+              <span class="fc-tag">${unitLabel}</span>
+            </div>
+          </div>
+        </div>
+        <div class="fc-controls">
+          <button class="fc-btn" onclick="fcPrev()">← Anterior</button>
+          <button class="fc-btn fc-btn-flip" onclick="fcFlip()">${s.flipped?'↺ Ocultar':'👁 Voltear'}</button>
+          <button class="fc-btn fc-btn-bad" onclick="fcMark(false)">${knownNow?'↩ Quitar de dominadas':'✗ Aún no'}</button>
+          <button class="fc-btn fc-btn-good" onclick="fcMark(true)">✓ La sé</button>
+          <button class="fc-btn" onclick="fcNext()">Siguiente →</button>
+        </div>
+      </div>`;
+  }
+
+  function fcFlip() { if (!fcState) return; fcState.flipped = !fcState.flipped; fcRender(); }
+  function fcNext() {
+    if (!fcState) return;
+    fcState.flipped = false;
+    fcState.idx = (fcState.idx + 1) % fcState.cards.length;
+    fcRender();
+  }
+  function fcPrev() {
+    if (!fcState) return;
+    fcState.flipped = false;
+    fcState.idx = (fcState.idx - 1 + fcState.cards.length) % fcState.cards.length;
+    fcRender();
+  }
+  function fcMark(known) {
+    if (!fcState) return;
+    const c = fcState.cards[fcState.idx];
+    fcMarkKnown(c._id, known);
+    updateDashboardStats();
+    if (known) fcNext(); else fcRender();
+  }
+  function fcExit() { fcState = null; fcRender(); }
+
+  document.addEventListener('keydown', (e) => {
+    if (!fcState) return;
+    const sec = document.getElementById('section-flashcards');
+    if (!sec || !sec.classList.contains('active')) return;
+    if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); fcFlip(); }
+    else if (e.key === 'ArrowRight') fcNext();
+    else if (e.key === 'ArrowLeft')  fcPrev();
+  });
+
+  // Quiz keyboard shortcuts: 1-4 selecciona opción, Enter avanza
+  document.addEventListener('keydown', (e) => {
+    if (!quizState || quizState.finished) return;
+    const sec = document.getElementById('section-quiz');
+    if (!sec || !sec.classList.contains('active')) return;
+    if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) return;
+    if (!quizState.answered && ['1','2','3','4'].includes(e.key)) {
+      const i = parseInt(e.key, 10) - 1;
+      if (i < quizState.questions[quizState.current].opts.length) quizChoose(i);
+    } else if (quizState.answered && (e.key === 'Enter' || e.key === ' ')) {
+      e.preventDefault(); quizNext();
+    }
+  });
+
+  /* ═══════════════════════ NOTAS PERSONALES ═══════════════════════ */
+  // Reemplaza la tab "Notas" del modal por un editor persistente por unidad
+  function notesKey(uid) { return 'hc-notes-' + uid; }
+  function getUserNote(uid) { return localStorage.getItem(notesKey(uid)) || ''; }
+  function setUserNote(uid, val) { localStorage.setItem(notesKey(uid), val); }
+
+  let notesTimer = null;
+  function renderNotesEditor(uid) {
+    const original = (window.UNIT_DETAIL && window.UNIT_DETAIL[uid] && window.UNIT_DETAIL[uid].notas) || '';
+    const userNote = getUserNote(uid);
+    return `
+      <div class="notes-editor-wrap">
+        <div class="notes-editor-toolbar">
+          <div class="notes-editor-status" id="notesStatus"><span class="dot"></span>Guardado</div>
+          <div class="notes-editor-actions">
+            ${original ? '<button class="notes-editor-btn" onclick="toggleOriginalNotes()">📑 Ver notas oficiales</button>' : ''}
+            <button class="notes-editor-btn danger" onclick="clearUserNotes('${uid}')">🗑 Borrar mis notas</button>
+          </div>
+        </div>
+        <textarea class="notes-editor-area" id="notesArea" placeholder="Escribe aquí tus apuntes para esta unidad. Se guarda automáticamente en este navegador.">${userNote.replace(/</g,'&lt;')}</textarea>
+        <div class="notes-editor-hint">💾 Tus notas se guardan localmente y persisten al recargar. Botón "PDF" del modal exporta las notas oficiales de la profesora.</div>
+        <div id="origNotesBox" style="display:none;margin-top:18px;padding:18px 20px;background:var(--bg-main);border-radius:12px;border-left:4px solid var(--primary)">
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-secondary);margin-bottom:10px">Notas oficiales</div>
+          ${original || '<p style="color:var(--text-secondary)">Sin notas oficiales disponibles.</p>'}
+        </div>
+      </div>`;
+  }
+
+  function toggleOriginalNotes() {
+    const el = document.getElementById('origNotesBox');
+    if (!el) return;
+    el.style.display = el.style.display === 'none' ? 'block' : 'none';
+  }
+
+  function clearUserNotes(uid) {
+    if (!confirm('¿Borrar tus notas personales de esta unidad? Esta acción no se puede deshacer.')) return;
+    setUserNote(uid, '');
+    const ta = document.getElementById('notesArea');
+    if (ta) ta.value = '';
+    const st = document.getElementById('notesStatus');
+    if (st) st.innerHTML = '<span class="dot"></span>Borrado';
+  }
+
+  function attachNotesAutoSave(uid) {
+    const ta = document.getElementById('notesArea');
+    const st = document.getElementById('notesStatus');
+    if (!ta || !st) return;
+    const flush = () => {
+      setUserNote(uid, ta.value);
+      st.classList.remove('saving');
+      st.innerHTML = '<span class="dot"></span>Guardado';
+    };
+    ta.addEventListener('input', () => {
+      st.classList.add('saving');
+      st.innerHTML = '<span class="dot"></span>Guardando…';
+      clearTimeout(notesTimer);
+      notesTimer = setTimeout(flush, 400);
+    });
+    ta.addEventListener('blur', () => { clearTimeout(notesTimer); flush(); });
+  }
+
+  // Flush pending note before navigation / close
+  function flushPendingNote() {
+    const ta = document.getElementById('notesArea');
+    if (ta && currentUnit !== null) {
+      clearTimeout(notesTimer);
+      setUserNote(currentUnit, ta.value);
+    }
+  }
+
+  // Hook into renderTab to swap "notas" tab to editor
+  const _origRenderTab = renderTab;
+  renderTab = function(tab) {
+    flushPendingNote();
+    const el = document.getElementById('umContent');
+    if (tab === 'notas') {
+      el.innerHTML = renderNotesEditor(currentUnit);
+      el.scrollTop = 0;
+      attachNotesAutoSave(currentUnit);
+      return;
+    }
+    _origRenderTab(tab);
+  };
+
+  // Hook closeUnit to flush note before close
+  const _origCloseUnit = closeUnit;
+  closeUnit = function() { flushPendingNote(); _origCloseUnit(); };
+
+  /* ═══════════════════════ MI PROGRESO ═══════════════════════ */
+  function renderProgresoView() {
+    const root = document.getElementById('mpContent');
+    if (!root) return;
+    const units = [['1','U1','Anemias'],['2','U2','Leucocitaria'],['3','U3','NMP / Linfomas'],['lab','LAB','Laboratorio']];
+
+    // Card 1: Progreso de visita por unidad
+    const visitedRows = units.map(([uid,label,name]) => {
+      const v = getProgress(uid).length;
+      const pct = (v / 4) * 100;
+      return `<div class="mp-row">
+        <div class="mp-row-lbl">${label} · ${name}</div>
+        <div style="display:flex;align-items:center">
+          <span class="mp-row-val">${v}/4</span>
+          <div class="mp-bar-outer"><div class="mp-bar-inner" style="width:${pct}%"></div></div>
+        </div>
+      </div>`;
+    }).join('');
+
+    // Card 2: Mejor puntaje quiz por unidad
+    const quizRows = ['1','2','3','lab','all'].map(uid => {
+      const label = uid === 'all' ? 'TODAS' : QUIZ_UNITS[uid==='lab'?'lab':parseInt(uid,10)].label;
+      const name  = uid === 'all' ? 'Quiz general' : QUIZ_UNITS[uid==='lab'?'lab':parseInt(uid,10)].name;
+      const best = quizBest(uid);
+      const pct = best;
+      const color = best >= 80 ? '#2e7d32' : best >= 60 ? '#b8860b' : best > 0 ? '#c0392b' : 'var(--border)';
+      return `<div class="mp-row">
+        <div class="mp-row-lbl">${label} · ${name}</div>
+        <div style="display:flex;align-items:center">
+          <span class="mp-row-val">${best > 0 ? best+'%' : '—'}</span>
+          <div class="mp-bar-outer"><div class="mp-bar-inner" style="width:${pct}%;background:${color}"></div></div>
+        </div>
+      </div>`;
+    }).join('');
+
+    // Card 3: Flashcards
+    const fcRows = units.map(([uid,label,name]) => {
+      const pool = FC_BANK.filter(c => c.u === (uid==='lab'?'lab':parseInt(uid,10)));
+      const k = pool.filter(c => fcKnown().includes(c._id)).length;
+      const pct = pool.length ? (k / pool.length) * 100 : 0;
+      return `<div class="mp-row">
+        <div class="mp-row-lbl">${label} · ${name}</div>
+        <div style="display:flex;align-items:center">
+          <span class="mp-row-val">${k}/${pool.length}</span>
+          <div class="mp-bar-outer"><div class="mp-bar-inner" style="width:${pct}%;background:#a8d4b8"></div></div>
+        </div>
+      </div>`;
+    }).join('');
+
+    // Card 4: Estadísticas globales
+    const totalVisited = units.reduce((s,[u]) => s + getProgress(u).length, 0);
+    const globalPct = Math.round((totalVisited / 16) * 100);
+    const totalQuiz = quizCount();
+    const totalKnown = fcKnown().length;
+    const bestAll = Math.max(...['1','2','3','lab','all'].map(quizBest));
+
+    root.innerHTML = `
+      <div class="mp-grid">
+        <div class="mp-card">
+          <div class="mp-card-title">📚 Avance de contenido</div>
+          ${visitedRows}
+          <div class="mp-row" style="border-top:2px solid var(--border);margin-top:6px;padding-top:14px">
+            <div class="mp-row-lbl"><b>Total global</b></div>
+            <div style="display:flex;align-items:center">
+              <span class="mp-row-val">${globalPct}%</span>
+              <div class="mp-bar-outer"><div class="mp-bar-inner" style="width:${globalPct}%"></div></div>
+            </div>
+          </div>
+        </div>
+        <div class="mp-card">
+          <div class="mp-card-title">✏️ Mejores puntajes quiz</div>
+          ${quizRows}
+          <div class="mp-row" style="border-top:2px solid var(--border);margin-top:6px;padding-top:14px">
+            <div class="mp-row-lbl"><b>Quizzes realizados</b></div>
+            <div class="mp-row-val">${totalQuiz}</div>
+          </div>
+        </div>
+        <div class="mp-card">
+          <div class="mp-card-title">🃏 Flashcards dominadas</div>
+          ${fcRows}
+          <div class="mp-row" style="border-top:2px solid var(--border);margin-top:6px;padding-top:14px">
+            <div class="mp-row-lbl"><b>Total dominadas</b></div>
+            <div class="mp-row-val">${totalKnown} / ${FC_BANK.length}</div>
+          </div>
+        </div>
+        <div class="mp-card">
+          <div class="mp-card-title">🎯 Resumen</div>
+          <div class="mp-row"><div class="mp-row-lbl">Unidades completadas</div><div class="mp-row-val">${units.filter(([u]) => getProgress(u).length === 4).length} / 4</div></div>
+          <div class="mp-row"><div class="mp-row-lbl">Secciones visitadas</div><div class="mp-row-val">${totalVisited} / 16</div></div>
+          <div class="mp-row"><div class="mp-row-lbl">Mejor puntaje global</div><div class="mp-row-val">${bestAll > 0 ? bestAll+'%' : '—'}</div></div>
+          <div class="mp-row"><div class="mp-row-lbl">Flashcards aprendidas</div><div class="mp-row-val">${totalKnown}</div></div>
+          <div class="mp-reset-area">
+            <button class="mp-reset-btn" onclick="resetAllProgress()">↺ Reiniciar todo el progreso</button>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  function resetAllProgress() {
+    if (!confirm('¿Reiniciar TODO el progreso? Se borrarán visitas, puntajes de quiz, flashcards dominadas y notas personales. Esta acción no se puede deshacer.')) return;
+    ['1','2','3','lab'].forEach(u => localStorage.removeItem('hc-progress-' + u));
+    ['1','2','3','lab','all'].forEach(u => localStorage.removeItem('hc-quiz-best-' + u));
+    localStorage.removeItem('hc-quiz-count');
+    localStorage.removeItem('hc-fc-known');
+    ['1','2','3','lab'].forEach(u => localStorage.removeItem('hc-notes-' + u));
+    ['1','2','3','lab'].forEach(u => renderProgress(u));
+    updateGlobalProgress();
+    updateDashboardStats();
+    renderProgresoView();
+  }
+
+  /* ═══════════════════════ ESTADÍSTICAS DASHBOARD ═══════════════════════ */
+  function updateDashboardStats() {
+    const unitsDone = ['1','2','3','lab'].filter(u => getProgress(u).length === 4).length;
+    const elU = document.getElementById('stat-units-done');
+    const elQ = document.getElementById('stat-quiz-count');
+    const elF = document.getElementById('stat-fc-count');
+    const elB = document.getElementById('stat-quiz-best');
+    if (elU) elU.textContent = unitsDone;
+    if (elQ) elQ.textContent = quizCount();
+    if (elF) elF.textContent = fcKnown().length;
+    if (elB) {
+      const best = Math.max(...['1','2','3','lab','all'].map(quizBest));
+      elB.textContent = best > 0 ? best + '%' : '—';
+    }
+  }
+  updateDashboardStats();
+
+  /* ═══════════════════════ SHOWSECTION OVERRIDE ═══════════════════════ */
+  const _origShowSection = showSection;
+  showSection = function(name, navEl) {
+    _origShowSection(name, navEl);
+    if (name === 'quiz')       quizRender();
+    if (name === 'flashcards') fcRender();
+    if (name === 'progreso')   renderProgresoView();
+    if (name === 'dashboard')  updateDashboardStats();
+  };
+  </script>
+</body>
+</html>
